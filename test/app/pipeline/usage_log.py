@@ -23,6 +23,12 @@ DEFAULT_DETAIL_LOG_PATH = Path("logs/llm_call_details.jsonl")
 # 정확한 값은 콘솔의 https://ai.google.dev/gemini-api/docs/rate-limits 에서 다시 확인할 것 —
 # 여기 값은 웹 검색 기준이라 프로젝트별 쿼터와 다를 수 있다.
 FREE_TIER_LIMITS: dict[str, dict[str, int]] = {
+    # 3.5~3.8 "flash"(Lite 아님)는 사용자가 콘솔에서 직접 확인한 값 — RPD 20은
+    # flash-lite 계열(1,500)의 1/75 수준이니 튜닝 루프를 아주 아껴 써야 한다.
+    "gemini-3.5-flash": {"rpm": 5, "tpm": 250_000, "rpd": 20},  # §10 D-14, 콘솔에서 직접 확인
+    "gemini-3.6-flash": {"rpm": 5, "tpm": 250_000, "rpd": 20},
+    "gemini-3.7-flash": {"rpm": 5, "tpm": 250_000, "rpd": 20},
+    "gemini-3.8-flash": {"rpm": 5, "tpm": 250_000, "rpd": 20},
     "gemini-3.5-flash-lite": {"rpm": 30, "tpm": 250_000, "rpd": 1_500},  # 2026-09-09부터 사용 중 (§10 D-11)
     "gemini-3.1-flash-lite": {"rpm": 30, "tpm": 1_000_000, "rpd": 1_500},
     "gemini-2.0-flash": {"rpm": 15, "tpm": 1_000_000, "rpd": 1_500},

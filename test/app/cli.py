@@ -236,9 +236,15 @@ def usage_report(
     model = os.getenv("GEMINI_MODEL", "")
     limits = usage_log.limits_for_model(model) if model else None
     if limits:
-        today_real_calls = sum(1 for e in usage_log.read_entries(log, since=utc_today) if not e.cacheHit)
+        # 모델별로 RPD가 따로 관리된다(Google 쪽 쿼터가 모델 단위다) — 오늘 전체
+        # 호출이 아니라 "지금 .env에 설정된 이 모델"의 호출만 세야 한다. 안 그러면
+        # 다른 모델로 부른 것까지 이 모델의 한도를 갉아먹는 것처럼 보인다 —
+        # gemini-3.5-flash처럼 RPD가 20으로 아주 낮은 모델에서는 이 차이가 크다.
+        today_real_calls = sum(
+            1 for e in usage_log.read_entries(log, since=utc_today) if not e.cacheHit and e.model == model
+        )
         typer.echo(f"\n무료 티어 한도({model}): RPD {limits['rpd']}회 · RPM {limits['rpm']}회 · TPM {limits['tpm']:,}")
-        typer.echo(f"오늘(UTC 기준) 실제 API 호출: {today_real_calls} / {limits['rpd']}  (캐시 히트는 한도를 소모하지 않음. 콘솔의 실제 리셋 시각은 태평양시 자정이라 약간 다를 수 있음)")
+        typer.echo(f"오늘(UTC 기준) 이 모델 실제 API 호출: {today_real_calls} / {limits['rpd']}  (캐시 히트는 한도를 소모하지 않음. 콘솔의 실제 리셋 시각은 태평양시 자정이라 약간 다를 수 있음)")
     elif model:
         typer.echo(f"\n'{model}'의 한도 정보가 없다 — SPEC.md §10 표에 없는 모델이니 콘솔에서 직접 확인.")
 
