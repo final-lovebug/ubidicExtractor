@@ -1,0 +1,25 @@
+{
+  "workspaceId": "ws-potenup-be",
+  "dictionaryVersionNo": 7,
+  "existingTerms": [
+    {
+      "termId": "t-001",
+      "preferredForm": "구독자",
+      "englishName": "Subscriber",
+      "synonyms": ["이용자", "타겟 유저", "User"]
+    },
+    {
+      "termId": "t-002",
+      "preferredForm": "결제 실패",
+      "englishName": "PaymentFailure",
+      "synonyms": ["pg_error"]
+    }
+  ],
+  "documents": [
+    { "documentId": "d-001", "file": "docs/커머스_기획안.md",       "title": "구독 커머스 정책 정의서", "department": "기획" },
+    { "documentId": "d-002", "file": "docs/결제API명세v2.md",       "title": "결제 API 명세 v2",       "department": "개발" },
+    { "documentId": "d-003", "file": "docs/캠페인_실행안.md",       "title": "2026 상반기 캠페인 실행안", "department": "마케팅" },
+    { "documentId": "d-004", "file": "docs/운영_가이드.md",         "title": "서비스 운영 가이드",      "department": "기획" },
+    { "documentId": "d-005", "file": "docs/구독_도메인_설계노트.md", "title": "구독 도메인 설계 노트",   "department": "개발" }
+  ]
+}

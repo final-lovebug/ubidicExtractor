@@ -1,0 +1,26 @@
+id,kind,forms,preferred_form_hint,english_hint,trap_type,note
+G1,SYNONYM,이용 보류|휴면 전환|suspend_account,구독 일시정지,SubscriptionPause,,되돌릴 수 있는 일시 중지. 3개 부서가 다르게 부른다
+G2,SYNONYM,탈퇴|이탈|delete_user,구독 해지,SubscriptionCancellation,,되돌릴 수 없는 영구 삭제
+G3,SYNONYM,마일리지|혜택금|Credit,리워드 포인트,RewardPoint,,결제에 쓸 수 있는 적립금
+G4,VARIANT,로그인|로그 인,로그인,Login,,공백 정규화로 잡혀야 한다. LLM 없이
+G5,VARIANT,결제 수단|결제수단,결제 수단,PaymentMethod,,공백 정규화로 잡혀야 한다. LLM 없이
+G6,HOMOGRAPH,주문,,,,senses 2개 — 장바구니에 담긴 상태 / 결제 승인 후 확정된 건. 데모 핵심
+G7,HOMOGRAPH,활성,,,,senses 2개 — 계정 status=ACTIVE / 최근 30일 내 접속한 사용자
+G8,SYNONYM,요금제 변경|업셀링|change_tier,플랜 업그레이드,PlanUpgrade,,상위 요금제로 이동. 기획은 중립적으로 마케팅은 매출 관점으로 부른다
+G9,SYNONYM,상세 보기|콘텐츠 노출|detail_load,콘텐츠 조회,ContentView,,콘텐츠 상세에 진입하는 것. 세 부서가 각자 다른 관점의 이름을 쓴다
+G10,SYNONYM,정기 결제|반복 과금|recurring_billing,자동 결제,RecurringPayment,,주기마다 자동으로 청구되는 것
+G11,SYNONYM,기기 제한|계정 공유 차단|max_session,동시 접속 제한,SessionLimit,,같은 제약을 기획은 기능으로 마케팅은 정책으로 개발은 필드명으로 부른다
+G12,VARIANT,회원 가입|회원가입,회원 가입,SignUp,,공백 정규화
+G13,VARIANT,e-mail|email|E-Mail,이메일,Email,,하이픈 제거 + 소문자화로 잡혀야 한다. G4·G5와 다른 정규화 규칙을 검증
+G14,HOMOGRAPH,정산,,,,senses 2개 — PG사가 가맹점에 대금 입금 / 마케팅이 매체 광고비를 월말 마감
+G15,HOMOGRAPH,등급,,,,senses 2개 — 결제 누적액에 따른 회원 등급 / 연령 제한에 따른 콘텐츠 등급
+N1,NEGATIVE,결제 취소|환불,,,조건이 다름,묶으면 오답. 결제 승인 전 철회와 승인 후 반환은 다른 절차다
+N2,NEGATIVE,관리자|운영자,,,역할이 다름,묶으면 오답. 시스템 권한과 고객 응대는 다른 역할이다
+N3,NEGATIVE,결제|결제 수단,,,상위-하위,묶으면 오답. 상위-하위 관계는 동의어가 아니다
+N4,NEGATIVE,이용자|타겟 유저|User,,,이미 등재,사전집 r7의 구독자 동의어. 후보로 내면 오답
+N5,NEGATIVE,pg_error,,,이미 등재,사전집 r7의 결제 실패 동의어. 후보로 내면 오답
+N6,NEGATIVE,구독|구독료,,,상위-하위,묶으면 오답. 개념과 금액은 다르다
+N7,NEGATIVE,알림|공지,,,대상이 다름,묶으면 오답. 개인 대상과 전체 대상은 다르다
+N8,NEGATIVE,구독 갱신|구독 연장,,,주체가 다름,묶으면 오답. 시스템이 자동으로 하는 것과 이용자가 직접 누르는 것
+N9,NEGATIVE,결제일|결제월,,,편집거리 함정,묶으면 오답. 정규화 후 편집거리 1이라 VARIANT 규칙이 잘못 잡을 수 있다
+N10,NEGATIVE,반품|환불,,,절차가 다름,묶으면 오답. 물건 회수와 금액 반환은 다른 절차다

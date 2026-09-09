@@ -1,0 +1,20 @@
+[project]
+name = "ai-service"
+version = "0.1.0"
+description = "유비쿼터스 언어 사전 생성 — 용어 추출 AI 서비스"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "google-genai",
+    "python-dotenv",
+    "typer",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
