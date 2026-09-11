@@ -5,6 +5,14 @@
     python -m app.cli verify-offsets --result out/result.json --fixtures fixtures/
 
 `extract`는 HTTP를 거치지 않고 서비스 로직(`pipeline/`)을 직접 호출한다.
+
+SPEC.md §12 — 사전집 대조(`DictionaryContrast`). `extract`와 완전히 분리된
+파이프라인·픽스처·이력·사용량 로그다(§10 D-20):
+
+    python -m app.cli contrast --fixtures fixtures/contrast --out out/contrast_result.json
+    python -m app.cli score-contrast --result out/contrast_result.json --gold fixtures/contrast/gold.csv
+    python -m app.cli archive-contrast --label baseline
+    python -m app.cli contrast-usage-report
 """
 
 from __future__ import annotations
@@ -13,18 +21,25 @@ import json
 import os
 import random
 import shutil
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import typer
 from dotenv import load_dotenv
 
-from app.pipeline import usage_log
+from app.pipeline import contrast_usage_log, usage_log
+from app.pipeline.contrast import (
+    compute_contrast_score,
+    format_contrast_report,
+    load_contrast_fixture_request,
+    load_contrast_gold,
+)
+from app.pipeline.contrast_llm import find_llm_contrast_matches
 from app.pipeline.llm import extract_synonyms_and_homographs
 from app.pipeline.normalize import load_fixture_request, make_snippet
 from app.pipeline.synonym import build_homograph_candidates, build_synonym_candidates
 from app.pipeline.variant import find_variants
-from app.schema import ExtractResponse, GroupCandidate, HomographCandidate, Usage
+from app.schema import ContrastResponse, ExtractResponse, GroupCandidate, HomographCandidate, Usage
 from app.scoring import compute_score, format_report, load_gold
 
 load_dotenv()
@@ -32,19 +47,43 @@ load_dotenv()
 app = typer.Typer(add_completion=False)
 
 
-def _archive_to_history(result: Path, label: str = "") -> Path:
-    """`result`를 손대지 않고 `out/history/`에 타임스탬프(+라벨) 붙여 복사한다.
+def _archive_to_history(result: Path, label: str = "", dest_dir: Path = Path("out/history")) -> Path:
+    """`result`를 손대지 않고 `dest_dir`에 타임스탬프(+라벨) 붙여 복사한다.
 
     **덮어쓰지 않는다** — 부를 때마다 새 파일이 생긴다. `out/`는 `.gitignore`에
-    있으므로 `out/history/`도 로컬에만 남고 커밋되지 않는다.
+    있으므로 이 폴더들도 로컬에만 남고 커밋되지 않는다.
+
+    `dest_dir` 기본값은 `out/history/`(extract 전용)다 — `contrast`는
+    `out/contrast_history/`를 넘겨 완전히 분리된 이력을 쌓는다(§10 D-20).
     """
     timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
     filename = f"{timestamp}__{label}.json" if label else f"{timestamp}.json"
-    history_dir = Path("out/history")
-    history_dir.mkdir(parents=True, exist_ok=True)
-    dest = history_dir / filename
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / filename
     shutil.copy2(result, dest)
     return dest
+
+
+_CONTRAST_HISTORY_DIR = Path("out/contrast_history")
+
+
+def _today_real_calls_combined(model: str, utc_today: date) -> tuple[int, int]:
+    """오늘 이 모델의 실제 API 호출을 extract·contrast 두 로그에서 합산한다.
+
+    두 로그(`logs/llm_usage.jsonl`·`logs/contrast_llm_usage.jsonl`)는 파일이
+    분리돼 있지만 같은 Gemini 모델을 부르면 **같은 일일 쿼터(RPD)를 나눠
+    쓴다** — 한쪽만 보면 실제 소모량보다 적게 보인다(§10 D-20). 반환값은
+    `(extract 실제 호출 수, contrast 실제 호출 수)`.
+    """
+    extract_calls = sum(
+        1 for e in usage_log.read_entries(usage_log.DEFAULT_LOG_PATH, since=utc_today) if not e.cacheHit and e.model == model
+    )
+    contrast_calls = sum(
+        1
+        for e in contrast_usage_log.read_entries(contrast_usage_log.DEFAULT_LOG_PATH, since=utc_today)
+        if not e.cacheHit and e.model == model
+    )
+    return extract_calls, contrast_calls
 
 
 @app.command()
@@ -184,6 +223,59 @@ def verify_offsets(
 
 
 @app.command()
+def contrast(
+    fixtures: Path = typer.Option(
+        Path("fixtures/contrast"), "--fixtures", help="§12 전용 fixtures 폴더 (extract용 fixtures/와 분리)"
+    ),
+    out: Path = typer.Option(Path("out/contrast_result.json"), "--out", help="결과 JSON 저장 경로"),
+    model: str = typer.Option("", "--model", help="GEMINI_MODEL을 이번 실행만 덮어쓴다"),
+    no_cache: bool = typer.Option(False, "--no-cache", help="LLM 응답 캐시를 무시하고 다시 호출한다"),
+    note: str = typer.Option("", "--note", help="튜닝 루프 메모 — usage-report 타임라인에 그대로 남는다"),
+) -> None:
+    """SPEC.md §12 사전집 대조. **LLM 단독(정의 기반)이다**(§10 D-22).
+    실제 서비스 DB가 사전집에 동의어 목록을 저장하지 않기로 확정되면서,
+    등재된 동의어를 리터럴로 스캔하던 규칙 단계는 제거했다. `--skip-llm`도
+    함께 없앴다. LLM이 유일한 메커니즘이라 그 옵션을 쓰면 결과가 항상
+    빈 배열이라 더 이상 의미가 없다.
+
+    **매번 `out/contrast_history/`에도 자동으로 스냅샷을 남긴다.**
+    `extract`가 `out/history/`에 남기는 것과 같은 이유이지만 폴더는
+    완전히 분리했다(§10 D-20). 라벨을 붙이고 싶으면 `archive-contrast
+    --label`을 따로 돌린다.
+    """
+    request = load_contrast_fixture_request(fixtures)
+    suggestions, usage = find_llm_contrast_matches(request, model=model or None, no_cache=no_cache, note=note)
+
+    response = ContrastResponse(
+        jobId=request.jobId,
+        status="SUCCESS",
+        dictionaryVersionNo=request.dictionaryVersionNo,
+        suggestions=suggestions,
+        usage=usage,
+        warnings=[],
+    )
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(response.model_dump_json(indent=2), encoding="utf-8")
+    history_path = _archive_to_history(out, dest_dir=_CONTRAST_HISTORY_DIR)
+    typer.echo(f"{out} 에 저장했다. suggestions={len(suggestions)}개")
+    typer.echo(f"LLM 호출: model={usage.model} inputTokens={usage.inputTokens} outputTokens={usage.outputTokens}")
+    typer.echo(f"이력: {history_path}")
+
+
+@app.command(name="score-contrast")
+def score_contrast(
+    result: Path = typer.Option(Path("out/contrast_result.json"), "--result"),
+    gold: Path = typer.Option(Path("fixtures/contrast/gold.csv"), "--gold"),
+) -> None:
+    """contrast_result.json을 fixtures/contrast/gold.csv로 채점한다."""
+    response = ContrastResponse.model_validate_json(result.read_text(encoding="utf-8"))
+    gold_rows = load_contrast_gold(gold)
+    report = compute_contrast_score(response.suggestions, gold_rows)
+    typer.echo(format_contrast_report(report))
+
+
+@app.command()
 def archive(
     result: Path = typer.Option(Path("out/result.json"), "--result", help="스냅샷으로 남길 결과 파일"),
     label: str = typer.Option("", "--label", help="파일명에 붙일 라벨 (예: step2)"),
@@ -198,6 +290,20 @@ def archive(
         raise typer.Exit(code=1)
 
     dest = _archive_to_history(result, label=label)
+    typer.echo(f"{result} 를 {dest} 로 남겼다.")
+
+
+@app.command(name="archive-contrast")
+def archive_contrast(
+    result: Path = typer.Option(Path("out/contrast_result.json"), "--result", help="스냅샷으로 남길 결과 파일"),
+    label: str = typer.Option("", "--label", help="파일명에 붙일 라벨 (예: rule-only)"),
+) -> None:
+    """`out/contrast_history/`에 라벨을 붙여 한 번 더 남긴다. `archive`의 contrast판(§10 D-20)."""
+    if not result.exists():
+        typer.echo(f"{result} 가 없다 — 먼저 contrast를 돌려라.")
+        raise typer.Exit(code=1)
+
+    dest = _archive_to_history(result, label=label, dest_dir=_CONTRAST_HISTORY_DIR)
     typer.echo(f"{result} 를 {dest} 로 남겼다.")
 
 
@@ -240,16 +346,67 @@ def usage_report(
         # 호출이 아니라 "지금 .env에 설정된 이 모델"의 호출만 세야 한다. 안 그러면
         # 다른 모델로 부른 것까지 이 모델의 한도를 갉아먹는 것처럼 보인다 —
         # gemini-3.5-flash처럼 RPD가 20으로 아주 낮은 모델에서는 이 차이가 크다.
-        today_real_calls = sum(
-            1 for e in usage_log.read_entries(log, since=utc_today) if not e.cacheHit and e.model == model
-        )
+        #
+        # extract_calls는 이 로그(`--log` 인자, 기본 llm_usage.jsonl) 기준이고,
+        # contrast_calls는 별도 로그(contrast_llm_usage.jsonl) 기준이다 — 같은
+        # 모델이면 같은 RPD를 나눠 쓰므로 반드시 합산해서 보여준다(§10 D-20).
+        extract_calls, contrast_calls = _today_real_calls_combined(model, utc_today)
+        combined = extract_calls + contrast_calls
         typer.echo(f"\n무료 티어 한도({model}): RPD {limits['rpd']}회 · RPM {limits['rpm']}회 · TPM {limits['tpm']:,}")
-        typer.echo(f"오늘(UTC 기준) 이 모델 실제 API 호출: {today_real_calls} / {limits['rpd']}  (캐시 히트는 한도를 소모하지 않음. 콘솔의 실제 리셋 시각은 태평양시 자정이라 약간 다를 수 있음)")
+        typer.echo(
+            f"오늘(UTC 기준) 이 모델 실제 API 호출: {combined} / {limits['rpd']}"
+            f"  (용어추출 {extract_calls} + 사전집 대조 {contrast_calls}, 같은 모델은 RPD를 공유한다."
+            f" 캐시 히트는 한도를 소모하지 않음. 콘솔의 실제 리셋 시각은 태평양시 자정이라 약간 다를 수 있음)"
+        )
     elif model:
         typer.echo(f"\n'{model}'의 한도 정보가 없다 — SPEC.md §10 표에 없는 모델이니 콘솔에서 직접 확인.")
 
     typer.echo("")
     typer.echo(usage_log.format_timeline(entries))
+
+
+@app.command(name="contrast-usage-report")
+def contrast_usage_report(
+    log: Path = typer.Option(contrast_usage_log.DEFAULT_LOG_PATH, "--log", help="사전집 대조 LLM 사용량 로그 경로"),
+    today: bool = typer.Option(False, "--today", help="오늘 기록만 집계"),
+) -> None:
+    """§12 LLM 단계 전용 사용량 로그를 집계한다. `usage-report`(extract 전용)의 contrast판(§10 D-20).
+
+    `usage-report`와 파일도 스키마도 분리돼 있다. `matchesReturned`/
+    `matchesAccepted`/`matchesDropped`가 extract 로그엔 없는 contrast만의
+    지표다. 단, RPD 쿼터는 같은 모델이면 extract와 공유되므로 그 부분만
+    두 로그를 합산해서 보여준다.
+    """
+    utc_today = datetime.now(timezone.utc).date()
+    since = utc_today if today else None
+    entries = contrast_usage_log.read_entries(log, since=since)
+
+    if not entries:
+        typer.echo(f"{log} — 기록된 호출이 없다.")
+        typer.echo("contrast 명령을 --skip-llm 없이 돌리면 여기 쌓인다.")
+        return
+
+    summary = contrast_usage_log.summarize(entries)
+    typer.echo(f"기간: {'오늘' if today else '전체'}  ·  로그: {log}")
+    typer.echo(f"총 호출 {summary.totalCalls}  (캐시 히트 {summary.cacheHits} · 실제 API 호출 {summary.realCalls})")
+    typer.echo(f"입력 토큰 합계 {summary.totalInputTokens:,}  ·  출력 토큰 합계 {summary.totalOutputTokens:,}")
+    typer.echo(f"매치 채택 합계 {summary.totalMatchesAccepted}  ·  매치 환각(버려짐) 합계 {summary.totalMatchesDropped}")
+
+    model = os.getenv("GEMINI_MODEL", "")
+    limits = usage_log.limits_for_model(model) if model else None
+    if limits:
+        extract_calls, contrast_calls = _today_real_calls_combined(model, utc_today)
+        combined = extract_calls + contrast_calls
+        typer.echo(f"\n무료 티어 한도({model}): RPD {limits['rpd']}회 · RPM {limits['rpm']}회 · TPM {limits['tpm']:,}")
+        typer.echo(
+            f"오늘(UTC 기준) 이 모델 실제 API 호출: {combined} / {limits['rpd']}"
+            f"  (사전집 대조 {contrast_calls} + 용어추출 {extract_calls}, 같은 모델은 RPD를 공유한다)"
+        )
+    elif model:
+        typer.echo(f"\n'{model}'의 한도 정보가 없다 — SPEC.md §10 표에 없는 모델이니 콘솔에서 직접 확인.")
+
+    typer.echo("")
+    typer.echo(contrast_usage_log.format_timeline(entries))
 
 
 if __name__ == "__main__":

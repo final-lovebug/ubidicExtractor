@@ -4,6 +4,11 @@
 Spring 팀이 이 응답으로 먼저 연동을 시작할 수 있게 하는 것이 목적이다.
 
 2단계(문서 파싱) 이후는 아직 구현하지 않는다.
+
+`/contrast`(SPEC.md §12, DictionaryContrast)도 같은 이유로 아직 §12.4 C-1
+(계약 목킹) 단계다 — 실제 규칙 매칭(§12.4 C-2)은 `app/pipeline/contrast.py`
++ `app/cli.py`의 `contrast` 명령으로 CLI에서 먼저 검증하고, HTTP 배선은
+`/extract`와 함께 나중에 한다.
 """
 
 from __future__ import annotations
@@ -14,6 +19,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from app.schema import (
+    ContrastRequest,
+    ContrastResponse,
+    ContrastSuggestion,
     ExtractRequest,
     ExtractResponse,
     GroupCandidate,
@@ -115,6 +123,36 @@ def extract(request: ExtractRequest) -> ExtractResponse:
             llmCalls=0,
             elapsedMs=0,
         ),
+        warnings=[],
+    )
+
+
+def _fixed_contrast_suggestions() -> list[ContrastSuggestion]:
+    """SPEC.md §12.2의 예시를 그대로 옮긴 고정 제안 목록 — §12.4 C-1(계약 목킹)."""
+    return [
+        ContrastSuggestion(
+            termId="t-001",
+            preferredForm="구독자",
+            foundForm="이용자",
+            documentId="d-101",
+            department="마케팅",
+            snippet="이번 달 이용자 대상 혜택 안내드립니다",
+            charStart=12,
+            charEnd=15,
+            reason="사전집에 등재된 선호 표기는 '구독자'인데 문서에는 등재된 동의어 '이용자'로 쓰였다",
+            method="rule",
+        )
+    ]
+
+
+@app.post("/contrast", response_model=ContrastResponse)
+def contrast(request: ContrastRequest) -> ContrastResponse:
+    return ContrastResponse(
+        jobId=request.jobId,
+        status="SUCCESS",
+        dictionaryVersionNo=request.dictionaryVersionNo,
+        suggestions=_fixed_contrast_suggestions(),
+        usage=Usage(model="rule-based", inputTokens=0, outputTokens=0, llmCalls=0, elapsedMs=0),
         warnings=[],
     )
 

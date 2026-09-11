@@ -106,3 +106,39 @@ python -m app.cli extract --fixtures fixtures/ --out out/result.json
 python -m app.cli score   --result out/result.json --gold fixtures/gold.csv
 python -m app.cli verify-offsets --result out/result.json --fixtures fixtures/
 ```
+
+---
+
+## `contrast/` — 별도 픽스처 (SPEC.md §12 DictionaryContrast)
+
+위 `workspace.json`·`docs/*.md`·`gold.csv`는 **여기서 다시 쓰지 않는다** — `contrast/`는 독립된 픽스처 세트다. 다만 **사전집 도메인은 위 `gold.csv`·`workspace.json`에서 그대로 가져왔다**(SPEC.md §10 D-19) — "사전집이 이미 만들어져 있는 상태"를 가정하려면 실제로 팀이 검토한 도메인을 재사용하는 게 지어낸 예시보다 낫다.
+
+**판정은 LLM 단독(정의 기반)이다(SPEC.md §10 D-22).** 처음엔 "등재된 동의어를 리터럴로 스캔하는 규칙 단계 + LLM 단계"의 2단계였는데, 실제 서비스 DB가 사전집에 동의어 목록(`synonyms`)을 저장하지 않기로 확정되면서 규칙 단계를 없앴다 — 그래서 `dictionary.json`의 `synonyms`는 전부 `[]`다(실제 DB 모양 그대로). 지금은 `preferredForm`(선호 표기)과 `definition`(정의)만 갖고, 문서에 그 개념이 리터럴로 그대로 쓰였든 다른 말로 풀어썼든 LLM이 한 번에 찾는다.
+
+```
+contrast/
+  dictionary.json    사전집 13항목(정의 포함, synonyms는 전부 []) + 문서 2개 메타
+  docs/
+    9월_CS_이슈_노트.md                          사람이 쓴 19개 절 — 골드셋 25개를 커버
+    주간 운영 이슈 및 지표 점검 리포트.md         Gemini가 생성한 추가 검증 문서(아래 참고)
+  gold.csv           정답 15 · 함정 10 (25행 — extract의 gold.csv와 같은 규모, d-201만 채점 대상)
+```
+
+`dictionary.json`의 13항목 = `workspace.json`의 `existingTerms`(t-001 구독자 · t-002 결제 실패) + `gold.csv`의 SYNONYM/VARIANT 그룹 11개(G1·G2·G3·G4·G5·G8·G9·G10·G11·G12·G13). **HOMOGRAPH 4개(G6 주문·G7 활성·G14 정산·G15 등급)는 의도적으로 제외했다** — "치환할 선호 표기가 없다"는 이유(SPEC.md §10 D-19 참고).
+
+`gold.csv` 헤더는 `id,term_id,document_id,expected_text,trap_type,note`다(위쪽 `gold.csv`, §9b와는 다른 스키마):
+- `G-*`(정답 15개): `termId`+`documentId`만 맞으면 인정한다 — LLM이 실제로 짚어낼 문구를 정확히 예측할 수 없어서다. `expected_text`는 이 골드 행을 적을 때 실제로 봤던 문구를 남긴 **참고용** 컬럼일 뿐, 채점에는 안 쓴다
+- `N-*`(함정 10개): `term_id`를 비워둔다 — "어떤 termId로 갖다 붙이든 이 문서의 이 문구가 제안으로 나오면 오탐"이라는 뜻이다. `extract`의 N1·N2·N6·N7·N8·N10과 같은 소재를 재사용했는데, 목적은 **LLM이 사전집에 없는 근접 개념(환불·관리자·구독료·알림·반품·구독 갱신)이나 의도적으로 제외한 HOMOGRAPH 도메인(등급·주문)에 환각으로 termId를 갖다 붙이지 않는가**를 검증하는 것이다
+
+```bash
+python -m app.cli contrast --fixtures fixtures/contrast --out out/contrast_result.json   # LLM 단독, API 1회 호출
+python -m app.cli score-contrast --result out/contrast_result.json --gold fixtures/contrast/gold.csv
+```
+
+실측 결과(2026-09-10, SPEC.md §10 D-22) — **모델에 따라 재현율이 크게 갈렸다**: `gemini-3.1-flash-lite`는 일치 7/15(재현율 0.47, 오탐 0), 같은 프롬프트로 `--model gemini-3.5-flash`만 바꾸면 일치 15/15(정밀도·재현율 1.00, 오탐 0). 규칙 단계가 없어지면서 리터럴 매칭조차 이제 LLM 성능에 좌우된다는 게 실측으로 확인됐다 — `.env`에 약한 모델이 설정돼 있으면 재현율이 낮게 나올 수 있다.
+
+### 추가 검증 문서 — `주간 운영 이슈 및 지표 점검 리포트.md`
+
+`9월_CS_이슈_노트.md`는 사람이 직접 써서 답을 미리 알고 만든 문서다 — 파이프라인이 정말 일반화되는지, 아니면 이 문서에만 맞춰진 건지 알 수 없다는 한계가 있다. [`prompts/contrast_doc_gen_manual.md`](../prompts/contrast_doc_gen_manual.md)로 Gemini에게 직접 문서를 만들게 해서 `d-202`로 등록해뒀다 — Gemini가 표현 방식(리터럴 그대로/정의만 풀어서)을 스스로 고른 결과다. 문서를 사람이 직접 읽고 대조한 감사 결과를 `gold.csv`에 `G-16`~`G-26`(정답 11개)·`N-11`(함정 1개)로 반영했다(SPEC.md §10 D-23) — 이제 총 26행이다.
+
+실측 결과(`gemini-3.5-flash`, D-23): 일치 24/26, 오탐 0, 정밀도 1.00, 재현율 0.92 — `d-201`에서는 100%였던 같은 모델이 `d-202`에서는 2개(`타겟 유저`·`계정 공유 차단`)를 놓쳤다. 재현율이 문서마다 다르게 나올 수 있다는 걸 그대로 기록해둔다.

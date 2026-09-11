@@ -22,6 +22,7 @@
 | 4 | SYNONYM (LLM) | ✅ 완료 — 정밀도 1.00 (합격선 0.70), 첫 호출부터 통과 |
 | 5 | HOMOGRAPH (LLM) | ✅ `gemini-3.5-flash`·`gemini-3.6-flash` 둘 다 G6("주문") 100%(각 5/5), 오탐 0. `3.7·3.8-flash`는 서버 과부하로 측정 불가. §10 D-14·D-15 |
 | 6 | FastAPI 래핑 | ⬜ 미착수 |
+| §12 | DictionaryContrast (사전집 대조, `extract`와 별개 기능) | ✅ C-1·C-2 완료 — LLM 단독(정의 기반, synonyms 미사용). 모델 비교 진행 중(아래 §12 섹션 표 참고). §10 D-17~D-23 |
 
 ---
 
@@ -196,6 +197,71 @@ python -m app.cli score --result out/result.json --gold fixtures/gold.csv
 
 ---
 
+## §12 — DictionaryContrast (사전집 대조) ✅ C-1·C-2 완료 — `extract`와 별개 기능, LLM 단독
+
+**`extract`(1~6단계)와는 완전히 다른 기능이다.** 신규 용어를 찾지 않는다 — 이미 사전집에 등재된 용어가 신규 문서에서 어떻게 쓰였는지 찾는다. 코드·픽스처·엔드포인트·이력·사용량 로그 전부 `extract`와 분리돼 있다(SPEC.md §10 D-17·D-20).
+
+**LLM 단독(정의 기반)이다(§10 D-22).** 한때는 "규칙 단계(등재된 동의어 리터럴 스캔) + LLM 단계"의 2단계였는데(D-19), **실제 서비스 DB가 사전집에 동의어 목록을 저장하지 않기로 확정**되면서 규칙 단계를 제거했다 — 그 단계의 입력(`synonyms`)이 실제로는 항상 빈 배열이라 영원히 아무것도 못 찾았을 것이기 때문이다. 지금은 `preferredForm`(선호 표기)과 `definition`(정의)만 갖고, 리터럴로 그대로 쓰였든 다른 말로 풀어썼든 **LLM 한 번의 호출로** 찾는다.
+
+**통과 조건 (SPEC.md §12.4)**: C-2는 `gold.csv`의 `G*` 정답을 모두 찾고, 사전집에 없는 근접 개념(특히 HOMOGRAPH로 제외한 "등급"·"주문")에 termId를 갖다 붙이는 환각이 없어야 한다.
+
+**만들어진 것**:
+- `app/schema.py` — `DictionaryEntry(ExistingTerm)`에 `definition` 추가(공유 타입 `ExistingTerm` 자체는 안 건드림). `synonyms` 필드는 스키마엔 남지만 실제로는 항상 빈 배열이다
+- `app/pipeline/contrast.py` — 픽스처 로딩 + 채점(1단 리포트, D-22)
+- `app/pipeline/contrast_llm.py` — LLM 정의 기반 매칭(유일한 판정 로직). `pipeline/llm.py`와 같은 인프라(캐시·카운터·재시도) 재사용. `termId`/`matchedText`/`preferredForm과 동일 여부` 환각 방지 검증 3가지 포함
+- `prompts/contrast_01_role.md`~`contrast_04_input.md` — 리터럴+정의 기반을 한 번에 찾도록 작성(D-22)
+- `prompts/contrast_doc_gen_manual.md` — **사람이 직접 Gemini에 붙여넣어** 새 검증용 문서를 만드는 프롬프트(앱 코드가 자동 호출하지 않음). `9월_CS_이슈_노트.md`는 사람이 답을 알고 쓴 문서라, 이걸로 만든 `d-202`(주간 운영 이슈 및 지표 점검 리포트)가 "일반화되는지" 보는 두 번째 검증 문서다
+- `app/main.py` — `POST /contrast` (지금은 계약 목킹만, HTTP 배선은 6단계와 함께 나중에)
+- `app/pipeline/contrast_usage_log.py` — LLM 사용량 로그를 extract와 완전히 분리(§10 D-20). `out/contrast_history/`도 별도 폴더
+
+**돌릴 명령**:
+```bash
+python -m app.cli contrast --fixtures fixtures/contrast --out out/contrast_result.json   # LLM 단독, out/contrast_history/에 자동 이력
+python -m app.cli score-contrast --result out/contrast_result.json --gold fixtures/contrast/gold.csv
+python -m app.cli archive-contrast --label baseline        # 라벨 붙여 수동 스냅샷 (archive의 contrast판)
+python -m app.cli contrast-usage-report                    # usage-report의 contrast판, 별도 로그 집계
+```
+
+**모델별 실측 — `fixtures/contrast/gold.csv` 26행(정답 26·함정 12) 기준.** 규칙 단계가 없어지면서 리터럴 매칭조차 이제 모델 성능에 좌우된다는 게 실측으로 확인됐다(§10 D-22) — 5단계(HOMOGRAPH)처럼 모델을 바꿔가며 재현율을 비교하는 루프가 여기서도 필요하다:
+
+| 모델 | 호출 | 일치 | 오탐 | 정밀도 | 재현율 |
+|---|---|---|---|---|---|
+| `gemini-3.1-flash-lite` | 5(재현성 확인) | 11/26 (5회 전부 동일) | 0 | 1.00 | 0.42 |
+| `gemini-3.5-flash-lite` | 5(재현성 확인) | 11~16/26 (회차마다 다름, 평균 13/26) | 0 | 1.00 | 0.42~0.62 (평균 0.50) |
+| `gemini-3.5-flash` | 5(재현성 확인) | 22~24/26 (평균 23.2/26) | 0 | 1.00 | 0.85~0.92 (평균 0.89) |
+| `gemini-3.6-flash` | 5(재현성 확인) | 18~22/26 (평균 19.6/26) | 0 | 1.00 | 0.69~0.85 (평균 0.75) |
+| `gemini-3.7-flash` | 2회 시도 | 측정 불가 — 2회 연속 `503 UNAVAILABLE` | — | — | — |
+| `gemini-3.8-flash` | — | 미측정 | — | — | — |
+
+**오탐은 지금까지 모든 모델에서 0건** — 사전집에 없는 근접 개념(환불·관리자·구독료·알림/공지·등급·주문·반품·구독 갱신)에 termId를 갖다 붙이는 환각은 한 번도 없었다. `charStart`/`charEnd`도 전부 원문과 바이트 단위 일치(§10 D-22·D-23). 갈리는 건 **재현율뿐**이다.
+
+**`gemini-3.1-flash-lite`는 재현성까지 확인했다(§10 D-24)** — `--no-cache`로 5회 호출했는데 **놓치는 15개 행이 매번 정확히 같았다**(출력 토큰 수만 749~754로 미세하게 흔들림). 회차마다 다른 걸 놓쳤다면 "가끔 실수"로 볼 수 있었겠지만, 매번 똑같이 놓친다는 건 **이 모델이 그 개념들을 아예 못 알아본다**는 뜻에 더 가깝다 — 튜닝(프롬프트 수정)으로 해결될 문제가 아니라 모델 자체를 바꿔야 하는 문제라는 판단 근거다.
+
+**`gemini-3.5-flash-lite`는 반대로 회차마다 결과 자체가 흔들린다(§10 D-25)** — 5회 재현율이 0.42~0.62로 매번 다르게 나왔고, 놓치는 항목의 조합도 회차마다 달랐다(`.env`와 같은 temperature=0.1인데도). 평균 재현율은 `3.1-flash-lite`보다 조금 낫지만(0.50 > 0.42), **결과가 매번 달라진다는 게 튜닝 관점에서 더 큰 문제일 수 있다** — 프롬프트를 고쳤을 때 "정말 나아졌는지 우연인지" 이 모델로는 구분하기 어렵다. 정밀도는 5회 전부 1.00으로 완벽했다(오탐·환각 0건).
+
+**`gemini-3.5-flash`가 지금까지 가장 좋다(§10 D-26)** — 5회 평균 재현율 0.89(범위 0.85~0.92)로 Lite 계열 두 모델(0.42·0.50)보다 확실히 높고, 변동폭도 가장 좁다. 2회차에 `503 UNAVAILABLE`(서버 과부하)이 한 번 났지만 재시도하니 바로 성공했다 — `gemini-3.7`/`3.8-flash`(§10 D-15·D-16)처럼 계속되는 장애가 아니라 일시적 스파이크였다. 오탐·환각은 5회 전부 0건.
+
+**`gemini-3.6-flash`는 `3.5-flash`보다 오히려 낮다(§10 D-27)** — 평균 재현율 0.75(범위 0.69~0.85). `G-2`("pg_error")·`G-16`("타겟 유저")은 5회 전부 놓쳤다. **extract의 HOMOGRAPH 단계(§10 D-15)에서는 `3.6-flash`가 `3.5-flash`와 동급이었는데, §12에서는 그렇지 않다** — 같은 모델이라도 과제 성격에 따라 순위가 달라진다는 걸 보여준다. "다른 단계에서 좋았으니 여기서도 좋을 것"이라고 가정하면 안 된다. 오탐·환각은 5회 전부 0건. **지금까지는 여전히 `gemini-3.5-flash`가 §12 기준 최선.**
+
+**`gemini-3.7-flash`는 §12에서도 측정 불가(§10 D-28)** — 2회 연속 `503 UNAVAILABLE`(둘 다 120초·180초를 넘긴 뒤 실패). extract에서 겪은 D-15·D-16과 정확히 같은 패턴 — 이 프로젝트 문제가 아니라 모델 자체의 지속적인 용량 문제로 재확인. `gemini-3.8-flash`도 같은 계열이라 시도 전에 사용자 확인이 필요하다.
+
+새 모델을 추가로 재보려면 `--model`로 덮어써서 `.env`를 건드리지 않고 확인할 수 있다:
+```bash
+python -m app.cli contrast --fixtures fixtures/contrast --model gemini-3.6-flash --no-cache --out out/contrast_result.json --note "모델 비교: gemini-3.6-flash"
+python -m app.cli score-contrast --result out/contrast_result.json --gold fixtures/contrast/gold.csv
+```
+
+**로그·이력 분리(§10 D-20)**: `contrast`의 결과 이력(`out/contrast_history/`)과 LLM 사용량 로그(`logs/contrast_llm_usage.jsonl`·`logs/contrast_llm_call_details.jsonl`)는 `extract`(`out/history/`·`logs/llm_usage.jsonl`)와 완전히 분리돼 있다 — 같이 남기는 "기준"(찾은 게 뭔지)이 서로 다르기 때문이다. 단, **같은 Gemini 모델의 RPD 쿼터는 두 기능이 나눠 쓰므로**, `usage-report`/`contrast-usage-report` 둘 다 "오늘 이 모델 실제 호출"을 계산할 때 두 로그를 합산해서 보여준다.
+
+**확인 절차**:
+1. `score-contrast` 출력의 "일치 N/26"·"오탐"·"정밀도"·"재현율"을 위 표에 **매번 기록**한다(AGENTS.md 튜닝 루프 원칙 — extract의 정밀도 기록 관행과 동일)
+2. **오탐이 하나라도 나오면 그 즉시 원문을 확인** — `contrast_result.json`에서 그 termId·documentId·foundForm으로 찾아, 정말 다른 개념을 억지로 묶었는지 사람이 읽고 판단한다. 지금까진 0건이지만 새 모델을 넣을 때마다 다시 확인해야 한다
+3. `out/contrast_history/`에 쌓인 결과 JSON을 열어 **`reason` 필드가 실제로 말이 되는지** 몇 개 골라 읽어본다 — 채점(termId+documentId 일치)은 통과해도 근거가 억지스러우면 사람이 걸러야 한다(예: `t-103`(리워드 포인트)를 "포인트"라는 지나치게 일반적인 단어에도 붙인 사례가 실제로 있었다 — 오탐은 아니지만 제품 판단이 필요한 경계 사례)
+4. `.env`의 `GEMINI_MODEL`이 지금 어떤 모델인지 먼저 확인한다 — 위 표에서 재현율이 낮은 모델(`gemini-3.1-flash-lite`)로 남아있으면, `--model`을 안 주고 그냥 `contrast`를 돌렸을 때 좋은 결과가 아니라 이 낮은 재현율이 나온다
+5. 새 검증 문서를 늘리고 싶으면 `prompts/contrast_doc_gen_manual.md`로 Gemini에게 만들게 한 뒤, **문서 내용을 사람이 직접 읽고 대조해서** `gold.csv`에 반영한다 — Gemini의 자체 보고를 그대로 믿지 않는다(§10 D-23의 확인 절차 그대로)
+
+---
+
 ## `gold.csv` 읽는 법
 
 헤더: `id,kind,forms,preferred_form_hint,english_hint,trap_type,note`
@@ -204,6 +270,20 @@ python -m app.cli score --result out/result.json --gold fixtures/gold.csv
 - `forms`는 `|`로 구분된 표기들
 - `score` 명령은 각 `G*` 행의 `forms` 집합과 candidate의 `forms` 집합이 얼마나 겹치는지로 **완전 일치**(전부 겹침)·**부분 일치**(일부만)·**누락**(전혀 안 겹침)을 가른다. `N*` 행은 겹치면 무조건 **오탐**이다
 - 정밀도 = (완전 일치 + 부분 일치) ÷ (완전 일치 + 부분 일치 + 오탐), 재현율 = (완전 일치 + 부분 일치) ÷ 전체 `G*` 행 수 — `app/scoring.py`의 `compute_score()` 참고
+
+---
+
+## contrast의 `gold.csv` 읽는 법 (§12 전용, 위와 다른 스키마)
+
+`fixtures/contrast/gold.csv`는 위 extract용 `gold.csv`와 **헤더도 채점 방식도 다르다** — 따로 둔 이유는 §10 D-19 참고.
+
+헤더: `id,term_id,document_id,expected_text,trap_type,note`
+
+- `id`가 **`G*`면 찾아야 하는 정답**, **`N*`면 찾으면 오답**(함정) — 여기까진 위와 같다
+- `G*` 행은 `termId`+`documentId`가 결과의 `suggestions` 중 하나와 일치하면 "일치"다. **`expected_text`는 채점에 안 쓰는 참고용**이다 — LLM이 실제로 짚어내는 문구를 정확히 예측할 수 없어서, "이 행을 적을 때 봤던 문구" 정도로만 남겨둔다
+- `N*` 행은 `term_id`를 비워둔다 — "어떤 termId로 갖다 붙이든 이 `documentId`의 `expected_text` 문구가 제안으로 나오면 오탐"이라는 뜻이다. 사전집에 없는 근접 개념(환불·관리자 등)에 LLM이 환각으로 termId를 붙이지 않는지를 본다
+- 정밀도 = 일치 ÷ (일치 + 오탐), 재현율 = 일치 ÷ 전체 `G*` 행 수 — `app/pipeline/contrast.py`의 `compute_contrast_score()` 참고
+- **새 함정을 추가할 때 반드시 지킬 것**: 그 문구가 해당 문서에 실제로 있는지 먼저 원문에서 확인한다. 문서에 없는 문구를 `expected_text`로 넣으면, `contrast_llm.py`가 이미 "문서에 없는 matchedText"는 환각으로 걸러내므로 그 함정은 절대 트리거될 수 없는 죽은 테스트가 된다(§10 D-23에서 실제로 이 문제를 짚었다 — `d-202`엔 없는 함정 유형을 억지로 안 채운 이유)
 
 ---
 
@@ -230,6 +310,8 @@ stage별 호출 수: synonym: 1, homograph: 1
 - **비용**: 입력·출력 토큰 합계를 Google AI Studio 콘솔의 현재 단가와 곱해 1회·하루 비용 계산 (단가는 자주 바뀌어 코드에 하드코딩하지 않았다)
 - **오늘 얼마나 더 돌릴 수 있나**: `오늘 실제 API 호출`을 화면에 같이 나오는 `RPD` 한도와 비교 (캐시 히트는 한도를 안 먹으므로 제외됨)
 - **어디서 호출을 많이 쓰는지**: `stage별 호출 수`로 SYNONYM/HOMOGRAPH 중 어느 쪽이 튜닝 루프에서 API를 많이 쓰는지 확인
+
+**§12(contrast)는 로그가 완전히 별도다(§10 D-20)** — `python -m app.cli contrast-usage-report`로 확인한다. `matchesReturned`/`matchesAccepted`/`matchesDropped`(환각으로 버려진 수)가 여기서만 나오는 지표다. **RPD 한도는 `extract`와 같은 모델이면 공유된다** — 두 명령 다 "오늘 이 모델 실제 API 호출"에 두 로그를 합산한 숫자를 보여주므로, 어느 쪽으로 확인해도 같은 합계가 나와야 한다.
 
 ---
 

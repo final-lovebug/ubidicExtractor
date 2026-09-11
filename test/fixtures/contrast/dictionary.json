@@ -1,0 +1,101 @@
+{
+  "workspaceId": "ws-potenup-be",
+  "dictionaryVersionNo": 7,
+  "dictionary": [
+    {
+      "termId": "t-001",
+      "preferredForm": "구독자",
+      "englishName": "Subscriber",
+      "synonyms": [],
+      "definition": "이 서비스를 이용하는 계정의 주체"
+    },
+    {
+      "termId": "t-002",
+      "preferredForm": "결제 실패",
+      "englishName": "PaymentFailure",
+      "synonyms": [],
+      "definition": "PG 승인이 거절되어 결제가 완료되지 못한 상태"
+    },
+    {
+      "termId": "t-101",
+      "preferredForm": "구독 일시정지",
+      "englishName": "SubscriptionPause",
+      "synonyms": [],
+      "definition": "결제 실패 등으로 계정을 되돌릴 수 있게 일시 중지한 상태"
+    },
+    {
+      "termId": "t-102",
+      "preferredForm": "구독 해지",
+      "englishName": "SubscriptionCancellation",
+      "synonyms": [],
+      "definition": "되돌릴 수 없는 영구 삭제"
+    },
+    {
+      "termId": "t-103",
+      "preferredForm": "리워드 포인트",
+      "englishName": "RewardPoint",
+      "synonyms": [],
+      "definition": "결제에 쓸 수 있는 적립금"
+    },
+    {
+      "termId": "t-104",
+      "preferredForm": "로그인",
+      "englishName": "Login",
+      "synonyms": [],
+      "definition": "소셜 계정으로 서비스에 접속하는 행위"
+    },
+    {
+      "termId": "t-105",
+      "preferredForm": "결제 수단",
+      "englishName": "PaymentMethod",
+      "synonyms": [],
+      "definition": "결제에 사용하는 카드·계좌 등의 수단"
+    },
+    {
+      "termId": "t-108",
+      "preferredForm": "플랜 업그레이드",
+      "englishName": "PlanUpgrade",
+      "synonyms": [],
+      "definition": "상위 요금제로 이동하는 것"
+    },
+    {
+      "termId": "t-109",
+      "preferredForm": "콘텐츠 조회",
+      "englishName": "ContentView",
+      "synonyms": [],
+      "definition": "콘텐츠 상세에 진입하는 것"
+    },
+    {
+      "termId": "t-110",
+      "preferredForm": "자동 결제",
+      "englishName": "RecurringPayment",
+      "synonyms": [],
+      "definition": "주기마다 자동으로 청구되는 것"
+    },
+    {
+      "termId": "t-111",
+      "preferredForm": "동시 접속 제한",
+      "englishName": "SessionLimit",
+      "synonyms": [],
+      "definition": "한 계정에서 동시에 이용 가능한 기기 수를 제한하는 것"
+    },
+    {
+      "termId": "t-112",
+      "preferredForm": "회원 가입",
+      "englishName": "SignUp",
+      "synonyms": [],
+      "definition": "서비스 최초 이용을 위한 계정 생성 절차"
+    },
+    {
+      "termId": "t-113",
+      "preferredForm": "이메일",
+      "englishName": "Email",
+      "synonyms": [],
+      "definition": "가입·알림에 쓰이는 전자우편 주소"
+    }
+  ],
+  "documents": [
+    { "documentId": "d-201", "file": "docs/9월_CS_이슈_노트.md", "title": "9월 CS 이슈 노트", "department": "고객지원" },
+    { "documentId": "d-202", "file": "docs/주간 운영 이슈 및 지표 점검 리포트.md", "title": "주간 운영 이슈 및 지표 점검 리포트", "department": "고객지원" }
+  ]
+}
