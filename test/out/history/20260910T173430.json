@@ -1,0 +1,295 @@
+{
+  "jobId": "cli-run",
+  "status": "SUCCESS",
+  "dictionaryVersionNo": 7,
+  "candidates": [
+    {
+      "candidateId": "c-1",
+      "kind": "VARIANT",
+      "forms": [
+        "로그인",
+        "로그 인"
+      ],
+      "proposedPreferredForm": "로그인",
+      "proposedEnglishName": null,
+      "proposedDefinition": "\"로그인, 로그 인\"는 표기만 다르고 같은 대상을 가리키는 변형이다.",
+      "confidence": 1.0,
+      "reason": "정규화(공백·하이픈·언더스코어 제거, 소문자화, 조사 제거) 결과가 모두 '로그인'로 같다.",
+      "occurrenceCount": 12,
+      "documentCount": 4,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "로그인",
+          "snippet": "있다.\n\n## 2. 가입\n\n이용자는 소셜 계정으로 **로그인**한다. 최초 로그인 시 **회원 가입**이 자동으로",
+          "charStart": 161,
+          "charEnd": 164
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "로그 인",
+          "snippet": "\n광고를 클릭하면 캠페인 랜딩으로 보내고, 거기서 **로그 인**을 유도한다. 로그 인 이후 자동으로 쿠폰이 적용되",
+          "charStart": 1188,
+          "charEnd": 1192
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "로그인",
+          "snippet": "입\n\n이용자는 소셜 계정으로 **로그인**한다. 최초 로그인 시 **회원 가입**이 자동으로 처리되며 별도의 가입",
+          "charStart": 173,
+          "charEnd": 176
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "로그 인",
+          "snippet": "랜딩으로 보내고, 거기서 **로그 인**을 유도한다. 로그 인 이후 자동으로 쿠폰이 적용되도록 한다. 비로그인 상태",
+          "charStart": 1202,
+          "charEnd": 1206
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "로그인",
+          "snippet": "`POST /users/login` | 소셜 토큰으로 로그인. 최초 호출 시 자동 가입 |\n| `PATCH /us",
+          "charStart": 751,
+          "charEnd": 754
+        }
+      ]
+    },
+    {
+      "candidateId": "c-2",
+      "kind": "VARIANT",
+      "forms": [
+        "회원 가입",
+        "회원가입"
+      ],
+      "proposedPreferredForm": "회원 가입",
+      "proposedEnglishName": null,
+      "proposedDefinition": "\"회원 가입, 회원가입\"는 표기만 다르고 같은 대상을 가리키는 변형이다.",
+      "confidence": 1.0,
+      "reason": "정규화(공백·하이픈·언더스코어 제거, 소문자화, 조사 제거) 결과가 모두 '회원가입'로 같다.",
+      "occurrenceCount": 5,
+      "documentCount": 2,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "회원 가입",
+          "snippet": "소셜 계정으로 **로그인**한다. 최초 로그인 시 **회원 가입**이 자동으로 처리되며 별도의 가입 화면을 두지 않는",
+          "charStart": 181,
+          "charEnd": 186
+        },
+        {
+          "documentId": "d-004",
+          "department": "기획",
+          "form": "회원가입",
+          "snippet": "셜로 가입한 **e-mail**이면 어떤 수단으로 **회원가입**했는지 알려준다. 회원가입 수단은 나중에 바꿀 수 ",
+          "charStart": 349,
+          "charEnd": 353
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "회원 가입",
+          "snippet": " 자동으로 처리되며 별도의 가입 화면을 두지 않는다. 회원 가입 시점에 기본 요금제가 배정되고, 가입 완료 안내는 *",
+          "charStart": 219,
+          "charEnd": 224
+        },
+        {
+          "documentId": "d-004",
+          "department": "기획",
+          "form": "회원가입",
+          "snippet": "*이면 어떤 수단으로 **회원가입**했는지 알려준다. 회원가입 수단은 나중에 바꿀 수 없으므로 처음 쓴 소셜로 안내",
+          "charStart": 365,
+          "charEnd": 369
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "회원 가입",
+          "snippet": ", 가입 완료 안내는 **e-mail**로 발송한다. 회원 가입 이후 14일 동안은 언제든 무료로 해지할 수 있다.\n",
+          "charStart": 271,
+          "charEnd": 276
+        }
+      ]
+    },
+    {
+      "candidateId": "c-3",
+      "kind": "VARIANT",
+      "forms": [
+        "e-mail",
+        "email",
+        "E-Mail"
+      ],
+      "proposedPreferredForm": "e-mail",
+      "proposedEnglishName": null,
+      "proposedDefinition": "\"e-mail, email, E-Mail\"는 표기만 다르고 같은 대상을 가리키는 변형이다.",
+      "confidence": 1.0,
+      "reason": "정규화(공백·하이픈·언더스코어 제거, 소문자화, 조사 제거) 결과가 모두 'email'로 같다.",
+      "occurrenceCount": 6,
+      "documentCount": 4,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "e-mail",
+          "snippet": "시점에 기본 요금제가 배정되고, 가입 완료 안내는 **e-mail**로 발송한다. 회원 가입 이후 14일 동안은 언제든",
+          "charStart": 255,
+          "charEnd": 261
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "email",
+          "snippet": "`status` 필드로 구분한다.\n\n로그인 응답에는 `email` 필드가 포함된다. 소셜 제공자가 email을 주지 ",
+          "charStart": 1083,
+          "charEnd": 1088
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "E-Mail",
+          "snippet": "태에서는 혜택 안내만 보인다.\n\n수신 동의 이력은 **E-Mail** 기준으로 관리한다. 같은 사람이 소셜 계정을 여러",
+          "charStart": 1265,
+          "charEnd": 1271
+        },
+        {
+          "documentId": "d-004",
+          "department": "기획",
+          "form": "e-mail",
+          "snippet": "당 소셜 플랫폼으로 안내한다. 다른 소셜로 가입한 **e-mail**이면 어떤 수단으로 **회원가입**했는지 알려준다.",
+          "charStart": 328,
+          "charEnd": 334
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "email",
+          "snippet": "답에는 `email` 필드가 포함된다. 소셜 제공자가 email을 주지 않는 경우 `null`이 올 수 있으므로 클라",
+          "charStart": 1108,
+          "charEnd": 1113
+        }
+      ]
+    },
+    {
+      "candidateId": "c-4",
+      "kind": "VARIANT",
+      "forms": [
+        "결제 수단",
+        "결제수단"
+      ],
+      "proposedPreferredForm": "결제 수단",
+      "proposedEnglishName": null,
+      "proposedDefinition": "\"결제 수단, 결제수단\"는 표기만 다르고 같은 대상을 가리키는 변형이다.",
+      "confidence": 1.0,
+      "reason": "정규화(공백·하이픈·언더스코어 제거, 소문자화, 조사 제거) 결과가 모두 '결제수단'로 같다.",
+      "occurrenceCount": 11,
+      "documentCount": 4,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "결제 수단",
+          "snippet": "갈 수 있다. 결제 화면에서는 이용자가 등록해 둔 **결제 수단** 중 하나를 고른다. **결제수단**이 하나도 없으",
+          "charStart": 487,
+          "charEnd": 492
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "결제수단",
+          "snippet": " 등록해 둔 **결제 수단** 중 하나를 고른다. **결제수단**이 하나도 없으면 등록 화면으로 먼저 보낸다.\n\n결",
+          "charStart": 508,
+          "charEnd": 512
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "결제 수단",
+          "snippet": "히지만 계정 정보와 리워드는 그대로 남는다. 이용자가 결제 수단을 다시 등록하면 이용 보류가 풀린다.\n\n이용자가 직접",
+          "charStart": 1093,
+          "charEnd": 1098
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "결제수단",
+          "snippet": "한다.\n\n## 11. 결제 이슈 대응\n\n캠페인 중 **결제수단** 오류로 인한 이탈이 잦다. 결제 수단 등록 화면의",
+          "charStart": 1796,
+          "charEnd": 1800
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "결제 수단",
+          "snippet": " 가지며 만료된 것은 자동으로 소멸한다.\n\n## 8. 결제 수단\n\n`PaymentMethod`는 User당 최대 5개",
+          "charStart": 1475,
+          "charEnd": 1480
+        }
+      ]
+    },
+    {
+      "candidateId": "c-5",
+      "kind": "VARIANT",
+      "forms": [
+        "maxSession",
+        "max_session"
+      ],
+      "proposedPreferredForm": "maxSession",
+      "proposedEnglishName": null,
+      "proposedDefinition": "\"maxSession, max_session\"는 표기만 다르고 같은 대상을 가리키는 변형이다.",
+      "confidence": 1.0,
+      "reason": "정규화(공백·하이픈·언더스코어 제거, 소문자화, 조사 제거) 결과가 모두 'maxsession'로 같다.",
+      "occurrenceCount": 4,
+      "documentCount": 1,
+      "occurrences": [
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "maxSession",
+          "snippet": "t` | DateTime | 다음 청구 시각 |\n| `maxSession` | Int | 동시 접속 허용 수 |\n\n`statu",
+          "charStart": 335,
+          "charEnd": 345
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "max_session",
+          "snippet": "`도 함께 갱신한다.\n\n## 5. 동시 접속 제어\n\n`max_session`을 넘는 재생 요청이 오면 가장 오래된 세션을 종료하",
+          "charStart": 961,
+          "charEnd": 972
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "maxSession",
+          "snippet": "` 이후에 적용한다.\n\n`tierCode`가 바뀌면 `maxSession`도 함께 갱신한다.\n\n## 5. 동시 접속 제어\n\n`",
+          "charStart": 921,
+          "charEnd": 931
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "max_session",
+          "snippet": "하고 `409 SESSION_LIMIT`를 반환한다. max_session 값은 `tierCode`에서 파생되며 직접 수정할 수",
+          "charStart": 1031,
+          "charEnd": 1042
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "model": "gemini-3.5-flash",
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "llmCalls": 0,
+    "elapsedMs": 0
+  },
+  "warnings": [
+    "--skip-llm로 실행됨 — SYNONYM/HOMOGRAPH는 이번 결과에 없다."
+  ]
+}

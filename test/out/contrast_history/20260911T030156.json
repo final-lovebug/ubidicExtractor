@@ -1,0 +1,135 @@
+{
+  "jobId": "cli-contrast-run",
+  "status": "SUCCESS",
+  "dictionaryVersionNo": 7,
+  "suggestions": [
+    {
+      "termId": "t-101",
+      "preferredForm": "구독 일시정지",
+      "foundForm": "이용 보류",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "정 처리\n\n결제가 계속 실패한 계정은 일단 서비스 **이용 보류** 상태로 전환해두고, 나중에 카드 정보를 갱신하면 ",
+      "charStart": 173,
+      "charEnd": 178,
+      "reason": "결제 실패로 인해 계정을 일시 중지한 상태를 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-101",
+      "preferredForm": "구독 일시정지",
+      "foundForm": "이용 보류",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": " 과금 시스템은 미납으로 간주하여 해당 계정들을 즉시 이용 보류 상태로 일괄 변경했습니다. 주말 동안 고객센터로 인입",
+      "charStart": 196,
+      "charEnd": 201,
+      "reason": "결제 실패로 인해 계정을 일시 중지한 상태를 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-108",
+      "preferredForm": "플랜 업그레이드",
+      "foundForm": "요금제 변경",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "도 있었다.\n\n## 7. 요금제·업그레이드 문의\n\n**요금제 변경** 직후 차액이 바로 청구되는 이유를 묻는 문의가 있",
+      "charStart": 918,
+      "charEnd": 924,
+      "reason": "상위 요금제로 이동하는 상황을 포함하는 개념",
+      "method": "llm"
+    },
+    {
+      "termId": "t-108",
+      "preferredForm": "플랜 업그레이드",
+      "foundForm": "프리미엄 티어로 계약을 변경",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": "당 조치 이후, 기존 베이직 상품 이용자들이 더 비싼 프리미엄 티어로 계약을 변경하는 비율이 전월 동기 대비 약 15% 상승한 것으로 ",
+      "charStart": 530,
+      "charEnd": 545,
+      "reason": "상위 요금제로 이동하는 것을 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-109",
+      "preferredForm": "콘텐츠 조회",
+      "foundForm": "상세 보기",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "된다고 안내했다.\n\n## 8. 콘텐츠 조회 오류\n\n**상세 보기** 화면에서 재생이 안 된다는 문의는 대부분 동시 접",
+      "charStart": 1028,
+      "charEnd": 1033,
+      "reason": "콘텐츠 상세 화면에 진입하는 것을 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-109",
+      "preferredForm": "콘텐츠 조회",
+      "foundForm": "상세 보기",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": "니다. 사용자가 메인 홈 화면의 작품 썸네일을 탭하여 상세 보기 화면으로 넘어갈 때 발생하는 화면 렌더링 지연 시간을",
+      "charStart": 703,
+      "charEnd": 708,
+      "reason": "콘텐츠 상세 화면에 진입하는 것을 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-110",
+      "preferredForm": "자동 결제",
+      "foundForm": "정기 결제",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "문의는 대부분 동시 접속 한도 초과였다.\n\n## 9. 정기 결제·자동 청구 문의\n\n**정기 결제**일이 주말과 겹치면",
+      "charStart": 1081,
+      "charEnd": 1086,
+      "reason": "주기마다 자동으로 청구되는 것을 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-111",
+      "preferredForm": "동시 접속 제한",
+      "foundForm": "기기 제한",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": " 그날 청구된다.\n\n## 10. 동시 접속 문의\n\n**기기 제한**을 넘겨 재생이 끊긴다는 문의에는 다른 기기에서 로",
+      "charStart": 1176,
+      "charEnd": 1181,
+      "reason": "한 계정에서 동시에 이용 가능한 기기 수를 제한하는 것을 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-113",
+      "preferredForm": "이메일",
+      "foundForm": "e-mail",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "대로 유지해야 한다고 안내했다. 가입 완료 안내가 **e-mail**로 안 왔다는 문의는 스팸함 확인을 먼저 안내한다.",
+      "charStart": 1320,
+      "charEnd": 1326,
+      "reason": "가입·알림에 쓰이는 전자우편 주소를 의미함",
+      "method": "llm"
+    },
+    {
+      "termId": "t-113",
+      "preferredForm": "이메일",
+      "foundForm": "e-mail",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": "간이 시작되는 시점에 고객이 최초 가입 시 등록해 둔 e-mail을 통해 자동 안내문을 발송하도록 시스템을 개편하고자 ",
+      "charStart": 1079,
+      "charEnd": 1085,
+      "reason": "가입·알림에 쓰이는 전자우편 주소를 의미함",
+      "method": "llm"
+    }
+  ],
+  "usage": {
+    "model": "gemini-3.1-flash-lite",
+    "inputTokens": 4617,
+    "outputTokens": 749,
+    "llmCalls": 1,
+    "elapsedMs": 11725
+  },
+  "warnings": []
+}

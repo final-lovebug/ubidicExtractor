@@ -1,0 +1,100 @@
+{
+  "jobId": "cli-run",
+  "status": "SUCCESS",
+  "dictionaryVersionNo": 7,
+  "candidates": [
+    {
+      "candidateId": "c-1",
+      "kind": "SYNONYM",
+      "forms": [
+        "이용 보류",
+        "휴면 전환",
+        "suspend_account"
+      ],
+      "proposedPreferredForm": "구독 일시정지",
+      "proposedEnglishName": "SubscriptionPause",
+      "proposedDefinition": "구독을 해지하지 않고 일시적으로 중단한 상태",
+      "confidence": 0.82,
+      "reason": "세 표현이 모두 구독 상태를 유지한 채 이용만 중단하는 것을 가리킨다",
+      "occurrenceCount": 13,
+      "documentCount": 5,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "이용 보류",
+          "snippet": "정 상태 정책\n\n결제 실패가 3회 누적되면 계정을 **이용 보류** 상태로 전환한다. 이용 보류 상태에서는 콘텐츠 조",
+          "charStart": 1024,
+          "charEnd": 1029
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "휴면 전환",
+          "snippet": "# 3. 이탈 방지\n\n결제 실패가 반복되는 계정은 **휴면 전환**되기 전에 리텐션 메시지를 보낸다. 휴면 전환은 이",
+          "charStart": 358,
+          "charEnd": 363
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "suspend_account",
+          "snippet": " 자동 가입 |\n| `PATCH /users/{id}/suspend_account` | 계정을 일시 중지한다. 결제 실패 누적 시 서버",
+          "charStart": 793,
+          "charEnd": 808
+        }
+      ]
+    },
+    {
+      "candidateId": "c-9",
+      "kind": "HOMOGRAPH",
+      "forms": [
+        "주문"
+      ],
+      "confidence": 0.91,
+      "reason": "기획 문서는 장바구니에 담긴 시점을, 개발 문서는 결제 승인 이후를 주문이라 부른다",
+      "occurrenceCount": 14,
+      "documentCount": 3,
+      "senses": [
+        {
+          "label": "장바구니에 담긴 상태",
+          "definition": "구매 의사만 표시되고 결제가 이뤄지지 않은 건",
+          "occurrences": [
+            {
+              "documentId": "d-001",
+              "department": "기획",
+              "form": "주문",
+              "snippet": "가 상품 **상세 보기**에서 담기 버튼을 누르면 **주문이 생성된다.** 이 시점의 주문은 아직 결제되지 않은",
+              "charStart": 353,
+              "charEnd": 355
+            }
+          ]
+        },
+        {
+          "label": "결제가 완료된 확정 건",
+          "definition": "결제 승인이 끝나 이행 대상이 된 건",
+          "occurrences": [
+            {
+              "documentId": "d-002",
+              "department": "개발",
+              "form": "주문",
+              "snippet": "ED\n```\n\n장바구니(CART)에 담긴 항목은 아직 주문이 아니다. **결제 승인(PG approve)이 떨어",
+              "charStart": 186,
+              "charEnd": 188
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "model": "mock",
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "llmCalls": 0,
+    "elapsedMs": 0
+  },
+  "warnings": [
+    "2단계(문서 파싱) — VARIANT/SYNONYM/HOMOGRAPH 판정 로직 없음. 1단계 예시 후보 2개에 실측 오프셋만 채웠다."
+  ]
+}
