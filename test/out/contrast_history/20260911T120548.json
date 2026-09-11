@@ -1,0 +1,183 @@
+{
+  "jobId": "cli-contrast-run",
+  "status": "SUCCESS",
+  "dictionaryVersionNo": 7,
+  "suggestions": [
+    {
+      "termId": "t-001",
+      "preferredForm": "구독자",
+      "foundForm": "이용자",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "\n\n## 1. 이번 달 문의 개요\n\n9월 한 달간 **이용자** 문의는 전월 대비 12% 늘었다. 결제 관련 문의",
+      "charStart": 67,
+      "charEnd": 70,
+      "reason": "사전집의 '구독자'(이 서비스를 이용하는 계정의 주체) 개념을 '이용자'라는 다른 말로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-101",
+      "preferredForm": "구독 일시정지",
+      "foundForm": "이용 보류",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "정 처리\n\n결제가 계속 실패한 계정은 일단 서비스 **이용 보류** 상태로 전환해두고, 나중에 카드 정보를 갱신하면 ",
+      "charStart": 173,
+      "charEnd": 178,
+      "reason": "사전집의 '구독 일시정지'(결제 실패 등으로 계정을 되돌릴 수 있게 일시 중지한 상태)를 '이용 보류'로 풀어 씀.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-102",
+      "preferredForm": "구독 해지",
+      "foundForm": "탈퇴",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "고 별도 승인 절차 없이 바로 복구됐다.\n\n## 3. 탈퇴·해지 문의\n\n**탈퇴** 문의는 대부분 \"다시 가입할",
+      "charStart": 449,
+      "charEnd": 451,
+      "reason": "사전집의 '구독 해지'(되돌릴 수 없는 영구 삭제)를 '탈퇴'라는 다른 말로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-103",
+      "preferredForm": "리워드 포인트",
+      "foundForm": "마일리지",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "매번 안내한다.\n\n## 4. 포인트·리워드 문의\n\n**마일리지** 소멸 문의가 많았다. 유효기간이 지난 마일리지는 ",
+      "charStart": 565,
+      "charEnd": 569,
+      "reason": "사전집의 '리워드 포인트'(결제에 쓸 수 있는 적립금)를 '마일리지'라는 다른 말로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-104",
+      "preferredForm": "로그인",
+      "foundForm": "로그 인",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": " 수 있다.\n\n## 5. 로그인 문의\n\n소셜 계정 **로그 인** 화면이 안 뜬다는 문의는 대부분 브라우저 캐시 문",
+      "charStart": 725,
+      "charEnd": 729,
+      "reason": "사전집의 '로그인'에 대해 띄어쓴 형태인 '로그 인'으로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-108",
+      "preferredForm": "플랜 업그레이드",
+      "foundForm": "요금제 변경",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "도 있었다.\n\n## 7. 요금제·업그레이드 문의\n\n**요금제 변경** 직후 차액이 바로 청구되는 이유를 묻는 문의가 있",
+      "charStart": 918,
+      "charEnd": 924,
+      "reason": "사전집의 '플랜 업그레이드'(상위 요금제로 이동하는 것)의 맥락과 연결되는 표현으로 사용됨.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-109",
+      "preferredForm": "콘텐츠 조회",
+      "foundForm": "상세 보기",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "된다고 안내했다.\n\n## 8. 콘텐츠 조회 오류\n\n**상세 보기** 화면에서 재생이 안 된다는 문의는 대부분 동시 접",
+      "charStart": 1028,
+      "charEnd": 1033,
+      "reason": "사전집의 '콘텐츠 조회'(콘텐츠 상세에 진입하는 것)를 '상세 보기'라는 다른 말로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-110",
+      "preferredForm": "자동 결제",
+      "foundForm": "정기 결제",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "문의는 대부분 동시 접속 한도 초과였다.\n\n## 9. 정기 결제·자동 청구 문의\n\n**정기 결제**일이 주말과 겹치면",
+      "charStart": 1081,
+      "charEnd": 1086,
+      "reason": "사전집의 '자동 결제'(주기마다 자동으로 청구되는 것)를 '정기 결제'로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-111",
+      "preferredForm": "동시 접속 제한",
+      "foundForm": "기기 제한",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": " 그날 청구된다.\n\n## 10. 동시 접속 문의\n\n**기기 제한**을 넘겨 재생이 끊긴다는 문의에는 다른 기기에서 로",
+      "charStart": 1176,
+      "charEnd": 1181,
+      "reason": "사전집의 '동시 접속 제한'(한 계정에서 동시에 이용 가능한 기기 수를 제한하는 것)을 '기기 제한'으로 풀어 씀.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-113",
+      "preferredForm": "이메일",
+      "foundForm": "e-mail",
+      "documentId": "d-201",
+      "department": "고객지원",
+      "snippet": "대로 유지해야 한다고 안내했다. 가입 완료 안내가 **e-mail**로 안 왔다는 문의는 스팸함 확인을 먼저 안내한다.",
+      "charStart": 1320,
+      "charEnd": 1326,
+      "reason": "사전집의 '이메일'을 영문 표기인 'e-mail'로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-101",
+      "preferredForm": "구독 일시정지",
+      "foundForm": "이용 보류",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": " 과금 시스템은 미납으로 간주하여 해당 계정들을 즉시 이용 보류 상태로 일괄 변경했습니다. 주말 동안 고객센터로 인입",
+      "charStart": 196,
+      "charEnd": 201,
+      "reason": "사전집의 '구독 일시정지' 개념을 '이용 보류'로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-103",
+      "preferredForm": "리워드 포인트",
+      "foundForm": "마일리지를",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": " 다음 달 요금 차감에 바로 적용할 수 있도록 500 마일리지를 지급 처리했습니다.\n\n2. 보안 정책 강화 후속 지표",
+      "charStart": 404,
+      "charEnd": 409,
+      "reason": "사전집의 '리워드 포인트'를 '마일리지'로 표현함.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-108",
+      "preferredForm": "플랜 업그레이드",
+      "foundForm": "계약을 변경하는",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": "기존 베이직 상품 이용자들이 더 비싼 프리미엄 티어로 계약을 변경하는 비율이 전월 동기 대비 약 15% 상승한 것으로 확인",
+      "charStart": 539,
+      "charEnd": 547,
+      "reason": "사전집의 '플랜 업그레이드' 개념을 '계약을 변경하는'으로 풀어 씀.",
+      "method": "llm"
+    },
+    {
+      "termId": "t-109",
+      "preferredForm": "콘텐츠 조회",
+      "foundForm": "상세 보기 화면",
+      "documentId": "d-202",
+      "department": "고객지원",
+      "snippet": "니다. 사용자가 메인 홈 화면의 작품 썸네일을 탭하여 상세 보기 화면으로 넘어갈 때 발생하는 화면 렌더링 지연 시간을 기존",
+      "charStart": 703,
+      "charEnd": 711,
+      "reason": "사전집의 '콘텐츠 조회' 개념을 '상세 보기 화면'으로 표현함.",
+      "method": "llm"
+    }
+  ],
+  "usage": {
+    "model": "gemini-3.5-flash-lite",
+    "inputTokens": 4725,
+    "outputTokens": 1365,
+    "llmCalls": 1,
+    "elapsedMs": 3897
+  },
+  "warnings": []
+}

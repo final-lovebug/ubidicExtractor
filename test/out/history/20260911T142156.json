@@ -290,10 +290,10 @@
         "휴면 전환"
       ],
       "proposedPreferredForm": "이용 보류",
-      "proposedEnglishName": "Account Suspension",
-      "proposedDefinition": "결제 실패 누적 등의 사유로 인해 계정의 서비스 이용 권한이 일시적으로 중단된 상태",
-      "confidence": 0.9,
-      "reason": "기획(d-001, d-004)의 '이용 보류', 개발(d-002)의 'suspend_account', 마케팅(d-003)의 '휴면 전환'은 모두 결제 실패 누적 시 계정 이용 권한을 일시 정지하는 동일한 개념과 상태를 의미한다.",
+      "proposedEnglishName": "AccountSuspension",
+      "proposedDefinition": "결제 실패 누적 등의 사유로 계정 이용이 일시 중지되었으나 계정 정보와 데이터는 유지되어 재등록 시 복구 가능한 상태",
+      "confidence": 0.95,
+      "reason": "기획 문서의 '이용 보류', 개발 명세의 'suspend_account', 마케팅 문서의 '휴면 전환'은 모두 결제 실패로 인해 계정을 일시 중지하는 동일한 개념 및 행위를 가리킨다.",
       "occurrenceCount": 13,
       "documentCount": 5,
       "occurrences": [
@@ -343,73 +343,15 @@
       "candidateId": "c-7",
       "kind": "SYNONYM",
       "forms": [
-        "마일리지",
-        "Credit",
-        "혜택금"
-      ],
-      "proposedPreferredForm": "마일리지",
-      "proposedEnglishName": "Credit",
-      "proposedDefinition": "프로모션 참여 등에 따라 유효기간을 두고 지급되어 다음 결제 시 현금처럼 차감 사용할 수 있는 적립형 혜택",
-      "confidence": 0.85,
-      "reason": "기획(d-001, d-004)의 '마일리지', 개발(d-002)의 'Credit', 마케팅(d-003)의 '혜택금'은 결제 시 차감 적용되는 동일한 적립형 포인트를 가리킨다.",
-      "occurrenceCount": 10,
-      "documentCount": 4,
-      "occurrences": [
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "마일리지",
-          "snippet": " 리워드 정책\n\n프로모션 기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸",
-          "charStart": 1327,
-          "charEnd": 1331
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "Credit",
-          "snippet": " API가 403을 반환한다.\n\n## 7. 리워드\n\n`Credit` 엔티티는 User에 귀속되며 결제 시 차감된다. 잔",
-          "charStart": 1361,
-          "charEnd": 1367
-        },
-        {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "혜택금",
-          "snippet": "준다.\n\n## 5. 혜택 설계\n\n캠페인 참여자에게 **혜택금**을 지급한다. 혜택금은 다음 결제에 쓸 수 있는 적",
-          "charStart": 895,
-          "charEnd": 898
-        },
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "마일리지",
-          "snippet": "기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸 수 있으며 유효기간은 지",
-          "charStart": 1341,
-          "charEnd": 1345
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "Credit",
-          "snippet": "T /users/{id}/credits`로 조회한다. Credit은 만료일을 가지며 만료된 것은 자동으로 소멸한다.\n\n",
-          "charStart": 1433,
-          "charEnd": 1439
-        }
-      ]
-    },
-    {
-      "candidateId": "c-8",
-      "kind": "SYNONYM",
-      "forms": [
         "탈퇴",
         "delete_user",
         "이탈"
       ],
       "proposedPreferredForm": "탈퇴",
-      "proposedEnglishName": "Account Deletion",
-      "proposedDefinition": "이용자가 직접 서비스를 종료하거나 계정을 영구 삭제하여 복구할 수 없는 상태",
-      "confidence": 0.85,
-      "reason": "기획(d-001)의 '탈퇴', 개발(d-002)의 'delete_user', 마케팅(d-003)의 '이탈'은 모두 계정을 영구 삭제하고 복구 불가능한 동일한 행위 및 상태를 가리킨다.",
+      "proposedEnglishName": "AccountDeletion",
+      "proposedDefinition": "계정을 영구 삭제하거나 서비스를 완전히 종료하여 유예 기간 후 개인정보 파기 절차로 연결되는 불가역적 상태",
+      "confidence": 0.92,
+      "reason": "기획 문서의 '탈퇴', 개발 명세의 'delete_user', 마케팅 문서의 '이탈'은 모두 복구 불가능하게 계정을 지우고 서비스를 그만두는 동일한 개념을 가리킨다.",
       "occurrenceCount": 16,
       "documentCount": 4,
       "occurrences": [
@@ -456,19 +398,77 @@
       ]
     },
     {
+      "candidateId": "c-8",
+      "kind": "SYNONYM",
+      "forms": [
+        "마일리지",
+        "Credit",
+        "혜택금"
+      ],
+      "proposedPreferredForm": "마일리지",
+      "proposedEnglishName": "Credit",
+      "proposedDefinition": "프로모션이나 캠페인을 통해 지급되며, 다음 결제 시 현금처럼 차감 사용할 수 있고 유효기간이 지나면 만료 소멸되는 적립형 포인트",
+      "confidence": 0.9,
+      "reason": "기획/운영 가이드의 '마일리지', 개발 명세의 'Credit', 마케팅 실행안의 '혜택금'은 모두 결제 시 차감 사용 가능한 유효기간 있는 적립금을 가리키는 동의어다.",
+      "occurrenceCount": 10,
+      "documentCount": 4,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "마일리지",
+          "snippet": " 리워드 정책\n\n프로모션 기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸",
+          "charStart": 1327,
+          "charEnd": 1331
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "Credit",
+          "snippet": " API가 403을 반환한다.\n\n## 7. 리워드\n\n`Credit` 엔티티는 User에 귀속되며 결제 시 차감된다. 잔",
+          "charStart": 1361,
+          "charEnd": 1367
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "혜택금",
+          "snippet": "준다.\n\n## 5. 혜택 설계\n\n캠페인 참여자에게 **혜택금**을 지급한다. 혜택금은 다음 결제에 쓸 수 있는 적",
+          "charStart": 895,
+          "charEnd": 898
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "마일리지",
+          "snippet": "기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸 수 있으며 유효기간은 지",
+          "charStart": 1341,
+          "charEnd": 1345
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "Credit",
+          "snippet": "T /users/{id}/credits`로 조회한다. Credit은 만료일을 가지며 만료된 것은 자동으로 소멸한다.\n\n",
+          "charStart": 1433,
+          "charEnd": 1439
+        }
+      ]
+    },
+    {
       "candidateId": "c-9",
       "kind": "HOMOGRAPH",
       "forms": [
         "주문"
       ],
       "confidence": 0.95,
-      "reason": "기획 문서에서는 이용자가 담기 버튼을 누르는 시점에 미결제 주문이 생성되는 반면, 개발 API 명세에서는 PG 결제 승인이 완료된 시점에만 주문(order) 레코드가 생성되어, 부서별로 가리키는 대상 및 레코드 집합이 다르다.",
+      "reason": "기획 문서에서는 결제 전 장바구니/담기 단계부터 생성되는 미결제 상태를 포함하여 '주문'으로 보지만, 개발 API 명세에서는 PG 결제 승인이 확정된 후에만 '주문(order)' 레코드가 생성되므로 세는 대상과 집합이 다르다.",
       "occurrenceCount": 14,
       "documentCount": 3,
       "senses": [
         {
-          "label": "구매 희망 및 장바구니 담기 단계의 미결제 주문",
-          "definition": "상품 상세 등에서 선택 및 담기 행위로 생성된 결제 승인 전 단계의 구매 시도 건",
+          "label": "기획/구매 흐름상의 결제 전 담기 단계 주문",
+          "definition": "상품 상세 보기에서 담기 버튼을 눌렀을 때 생성되며, 결제 승인 전 수량 변경이나 cancellation이 가능한 미결제 구매 의사건",
           "occurrences": [
             {
               "documentId": "d-001",
@@ -489,8 +489,8 @@
           ]
         },
         {
-          "label": "결제 승인 완료 후 확정된 주문 레코드",
-          "definition": "PG 결제 승인이 완료되어 orderId가 부여되고 이행 대기열에 들어가는 최종 결제 완료 건",
+          "label": "개발/결제 API상의 결제 승인 완료 주문 레코드",
+          "definition": "PG 결제 승인(approvalNo)이 완료된 후 1:1로 대응하여 생성되고 이행 대기열에 진입하는 확정된 order 엔티티 레코드",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -510,14 +510,14 @@
       "forms": [
         "활성"
       ],
-      "confidence": 0.9,
-      "reason": "마케팅 문서에서는 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미하나, 개발 문서에서는 접속 여부와 무관하게 정상 이용 가능한 계정 및 구독 상태(ACTIVE)를 의미하여 가리키는 대상의 집계 결과가 다르다.",
+      "confidence": 0.93,
+      "reason": "마케팅 문서에서는 '최근 30일 내 1회 이상 접속한 유저 세그먼트'를 의미하지만, 개발/도메인 문서에서는 사용자의 최근 접속 여부와 무관하게 DB상 status 필드가 ACTIVE로 설정되어 접근 권한이 부여된 상태를 의미하므로 대상 집합이 다르다.",
       "occurrenceCount": 5,
       "documentCount": 3,
       "senses": [
         {
-          "label": "최근 접속 이력 기준 마케팅 유저 세그먼트",
-          "definition": "최근 30일 이내에 1회 이상 서비스에 접속한 이용자 집단",
+          "label": "마케팅 세그먼트상의 최근 접속 사용자",
+          "definition": "최근 30일 이내에 서비스에 최소 1회 이상 접속한 이력이 있는 사용자 세그먼트",
           "occurrences": [
             {
               "documentId": "d-003",
@@ -530,8 +530,8 @@
           ]
         },
         {
-          "label": "계정 및 구독의 정상 이용 가능 상태(ACTIVE)",
-          "definition": "계정 또는 구독이 중지나 해지 없이 정상 권한을 유지하고 있는 시스템 상태값 (접속 여부와 무관)",
+          "label": "시스템 DB상 계정 및 구독 상태값",
+          "definition": "계정 또는 구독 레코드의 status 필드가 ACTIVE로 지정되어 정상 이용 및 콘텐츠 접근 권한이 유효한 상태",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -559,7 +559,7 @@
     "inputTokens": 6793,
     "outputTokens": 1196,
     "llmCalls": 1,
-    "elapsedMs": 47648
+    "elapsedMs": 23496
   },
   "warnings": []
 }

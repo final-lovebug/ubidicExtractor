@@ -290,10 +290,10 @@
         "휴면 전환"
       ],
       "proposedPreferredForm": "이용 보류",
-      "proposedEnglishName": "Account Suspension",
-      "proposedDefinition": "결제 실패 누적 등의 사유로 인해 계정의 서비스 이용 권한이 일시적으로 중단된 상태",
-      "confidence": 0.9,
-      "reason": "기획(d-001, d-004)의 '이용 보류', 개발(d-002)의 'suspend_account', 마케팅(d-003)의 '휴면 전환'은 모두 결제 실패 누적 시 계정 이용 권한을 일시 정지하는 동일한 개념과 상태를 의미한다.",
+      "proposedEnglishName": "AccountSuspension",
+      "proposedDefinition": "결제 실패 누적 등의 사유로 계정의 이용 권한이 일시적으로 중지된 상태.",
+      "confidence": 0.92,
+      "reason": "기획서의 '이용 보류', 개발 API의 'suspend_account', 마케팅 문서의 '휴면 전환'은 모두 결제 실패 누적으로 계정이 일시 중단되는 동일한 상태를 가리킨다.",
       "occurrenceCount": 13,
       "documentCount": 5,
       "occurrences": [
@@ -348,10 +348,10 @@
         "혜택금"
       ],
       "proposedPreferredForm": "마일리지",
-      "proposedEnglishName": "Credit",
-      "proposedDefinition": "프로모션 참여 등에 따라 유효기간을 두고 지급되어 다음 결제 시 현금처럼 차감 사용할 수 있는 적립형 혜택",
-      "confidence": 0.85,
-      "reason": "기획(d-001, d-004)의 '마일리지', 개발(d-002)의 'Credit', 마케팅(d-003)의 '혜택금'은 결제 시 차감 적용되는 동일한 적립형 포인트를 가리킨다.",
+      "proposedEnglishName": "Mileage",
+      "proposedDefinition": "프로모션 참여나 결제에 따라 사용자에게 지급되어 결제 시 현금처럼 사용할 수 있는 적립 포인트.",
+      "confidence": 0.88,
+      "reason": "기획서의 '마일리지', 개발 명세의 'Credit', 마케팅 문서의 '혜택금'은 모두 만료일을 가지며 결제 시 차감 사용 가능한 포인트 개념이다.",
       "occurrenceCount": 10,
       "documentCount": 4,
       "occurrences": [
@@ -405,11 +405,11 @@
         "delete_user",
         "이탈"
       ],
-      "proposedPreferredForm": "탈퇴",
-      "proposedEnglishName": "Account Deletion",
-      "proposedDefinition": "이용자가 직접 서비스를 종료하거나 계정을 영구 삭제하여 복구할 수 없는 상태",
+      "proposedPreferredForm": "회원 탈퇴",
+      "proposedEnglishName": "UserDeletion",
+      "proposedDefinition": "계정을 영구 삭제하고 30일 유예 후 개인정보를 파기하는 불가역적 종료 처리.",
       "confidence": 0.85,
-      "reason": "기획(d-001)의 '탈퇴', 개발(d-002)의 'delete_user', 마케팅(d-003)의 '이탈'은 모두 계정을 영구 삭제하고 복구 불가능한 동일한 행위 및 상태를 가리킨다.",
+      "reason": "기획서의 '탈퇴', 개발 명세의 'delete_user', 마케팅 문서의 '이탈'은 모두 계정을 완전 삭제하여 되돌릴 수 없는 동일한 상태 및 절차를 가리킨다.",
       "occurrenceCount": 16,
       "documentCount": 4,
       "occurrences": [
@@ -462,13 +462,13 @@
         "주문"
       ],
       "confidence": 0.95,
-      "reason": "기획 문서에서는 이용자가 담기 버튼을 누르는 시점에 미결제 주문이 생성되는 반면, 개발 API 명세에서는 PG 결제 승인이 완료된 시점에만 주문(order) 레코드가 생성되어, 부서별로 가리키는 대상 및 레코드 집합이 다르다.",
+      "reason": "기획 문서에서는 장바구니 담기 시점부터 결제 전까지의 미결제 대상을 주문으로 세는 반면, 개발 API 명세에서는 PG 결제 승인 완료 후에만 order 레코드가 생성되므로 부서별로 집계되는 주문 레코드의 대상과 개수가 다르다.",
       "occurrenceCount": 14,
       "documentCount": 3,
       "senses": [
         {
-          "label": "구매 희망 및 장바구니 담기 단계의 미결제 주문",
-          "definition": "상품 상세 등에서 선택 및 담기 행위로 생성된 결제 승인 전 단계의 구매 시도 건",
+          "label": "기획/운영 관점의 주문",
+          "definition": "장바구니에 상품을 담았을 때 생성되는 결제 전 상태를 포함한 구매 요청 객체",
           "occurrences": [
             {
               "documentId": "d-001",
@@ -489,8 +489,8 @@
           ]
         },
         {
-          "label": "결제 승인 완료 후 확정된 주문 레코드",
-          "definition": "PG 결제 승인이 완료되어 orderId가 부여되고 이행 대기열에 들어가는 최종 결제 완료 건",
+          "label": "개발 관점의 주문",
+          "definition": "PG 결제 승인이 완료된 시점에 승인 번호와 1:1로 생성되는 확정된 주문 레코드",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -510,14 +510,14 @@
       "forms": [
         "활성"
       ],
-      "confidence": 0.9,
-      "reason": "마케팅 문서에서는 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미하나, 개발 문서에서는 접속 여부와 무관하게 정상 이용 가능한 계정 및 구독 상태(ACTIVE)를 의미하여 가리키는 대상의 집계 결과가 다르다.",
+      "confidence": 0.92,
+      "reason": "마케팅 문서에서는 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 가리키나, 개발 및 구독 설계 문서에서는 서비스 이용 권한이 정상 유지 중인 ACTIVE 상태를 의미한다.",
       "occurrenceCount": 5,
       "documentCount": 3,
       "senses": [
         {
-          "label": "최근 접속 이력 기준 마케팅 유저 세그먼트",
-          "definition": "최근 30일 이내에 1회 이상 서비스에 접속한 이용자 집단",
+          "label": "마케팅 관점의 활성",
+          "definition": "최근 30일 이내에 1회 이상 로그인/접속한 사용자 세그먼트",
           "occurrences": [
             {
               "documentId": "d-003",
@@ -530,8 +530,8 @@
           ]
         },
         {
-          "label": "계정 및 구독의 정상 이용 가능 상태(ACTIVE)",
-          "definition": "계정 또는 구독이 중지나 해지 없이 정상 권한을 유지하고 있는 시스템 상태값 (접속 여부와 무관)",
+          "label": "시스템/구독 관점의 활성",
+          "definition": "계정 또는 구독 레코드의 status가 ACTIVE로 콘텐츠 접근 권한이 정상 부여된 상태",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -552,14 +552,63 @@
           ]
         }
       ]
+    },
+    {
+      "candidateId": "c-11",
+      "kind": "HOMOGRAPH",
+      "forms": [
+        "정산"
+      ],
+      "confidence": 0.9,
+      "reason": "개발 및 구독 설계 문서에서는 PG 결제 대금을 가맹점 계좌로 입금받는 대금 정산을 의미하고, 마케팅 문서에서는 집행된 광고 매체별 비용을 마감하고 입금하는 매체비 정산을 의미한다.",
+      "occurrenceCount": 11,
+      "documentCount": 3,
+      "senses": [
+        {
+          "label": "가맹점 결제 대금 정산",
+          "definition": "PG사에서 승인된 결제 대금을 주 1회 가맹점 계좌로 입금 및 마감하는 정산 절차",
+          "occurrences": [
+            {
+              "documentId": "d-002",
+              "department": "개발",
+              "form": "정산",
+              "snippet": "이며, 이 경우 주문은 생성되지 않는다.\n\n## 4. 정산\n\nPG사는 승인된 결제 대금을 **정산** 주기에 따",
+              "charStart": 536,
+              "charEnd": 538
+            },
+            {
+              "documentId": "d-005",
+              "department": "개발",
+              "form": "정산",
+              "snippet": "Changed` | 요금제 변경 확인 |\n\n## 8. 정산 연동\n\n가맹점 **정산** 배치는 구독 결제분과 단건",
+              "charStart": 1559,
+              "charEnd": 1561
+            }
+          ]
+        },
+        {
+          "label": "마케팅 광고 매체비 정산",
+          "definition": "광고 매체별 월간 집행 금액을 마감하고 세금계산서를 수취하여 대금을 지급하는 정산 절차",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "정산",
+              "snippet": " 경고를 두 번 준 뒤 차단한다.\n\n## 9. 캠페인 정산\n\n광고 매체별 집행액은 매월 말 **정산**한다. 정",
+              "charStart": 1553,
+              "charEnd": 1555
+            }
+          ]
+        }
+      ]
     }
   ],
   "usage": {
     "model": "gemini-3.6-flash",
     "inputTokens": 6793,
-    "outputTokens": 1196,
+    "outputTokens": 1338,
     "llmCalls": 1,
-    "elapsedMs": 47648
+    "elapsedMs": 34119
   },
   "warnings": []
 }

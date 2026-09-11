@@ -286,15 +286,17 @@
       "kind": "SYNONYM",
       "forms": [
         "이용 보류",
+        "휴면 전환",
+        "일시 중지",
         "suspend_account",
-        "휴면 전환"
+        "SUSPENDED"
       ],
       "proposedPreferredForm": "이용 보류",
-      "proposedEnglishName": "Account Suspension",
-      "proposedDefinition": "결제 실패 누적 등의 사유로 인해 계정의 서비스 이용 권한이 일시적으로 중단된 상태",
-      "confidence": 0.9,
-      "reason": "기획(d-001, d-004)의 '이용 보류', 개발(d-002)의 'suspend_account', 마케팅(d-003)의 '휴면 전환'은 모두 결제 실패 누적 시 계정 이용 권한을 일시 정지하는 동일한 개념과 상태를 의미한다.",
-      "occurrenceCount": 13,
+      "proposedEnglishName": "SuspendedAccount",
+      "proposedDefinition": "결제 실패 누적 등의 사유로 인해 서비스 이용이 일시적으로 제한되었으나, 결제 수단 재등록 등을 통해 복구 가능한 계정 상태",
+      "confidence": 0.95,
+      "reason": "기획서의 '이용 보류', 마케팅 문서의 '휴면 전환', 개발 API 명세의 '일시 중지' 및 'suspend_account'/'SUSPENDED'는 모두 결제 실패 누적으로 인해 계정이 일시적으로 정지되지만 복구 가능한 동일한 상태를 지칭합니다.",
+      "occurrenceCount": 17,
       "documentCount": 5,
       "occurrences": [
         {
@@ -306,14 +308,6 @@
           "charEnd": 1029
         },
         {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "suspend_account",
-          "snippet": " 자동 가입 |\n| `PATCH /users/{id}/suspend_account` | 계정을 일시 중지한다. 결제 실패 누적 시 서버",
-          "charStart": 793,
-          "charEnd": 808
-        },
-        {
           "documentId": "d-003",
           "department": "마케팅",
           "form": "휴면 전환",
@@ -322,20 +316,28 @@
           "charEnd": 363
         },
         {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "이용 보류",
-          "snippet": " 누적되면 계정을 **이용 보류** 상태로 전환한다. 이용 보류 상태에서는 콘텐츠 조회가 막히지만 계정 정보와 리워드",
-          "charStart": 1042,
-          "charEnd": 1047
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "일시 중지",
+          "snippet": "s/{id}/suspend_account` | 계정을 일시 중지한다. 결제 실패 누적 시 서버가 자동 호출 |\n| `",
+          "charStart": 816,
+          "charEnd": 821
         },
         {
           "documentId": "d-002",
           "department": "개발",
           "form": "suspend_account",
-          "snippet": " 바꾼다. 상향은 즉시, 하향은 다음 주기부터 |\n\n`suspend_account`는 되돌릴 수 있고 `delete_user`는 되돌릴",
-          "charStart": 991,
-          "charEnd": 1006
+          "snippet": " 자동 가입 |\n| `PATCH /users/{id}/suspend_account` | 계정을 일시 중지한다. 결제 실패 누적 시 서버",
+          "charStart": 793,
+          "charEnd": 808
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "SUSPENDED",
+          "snippet": "E` | **활성** 상태. 정상 이용 가능 |\n| `SUSPENDED` | 일시 중지 |\n| `DELETED` | 탈퇴 처",
+          "charStart": 1261,
+          "charEnd": 1270
         }
       ]
     },
@@ -343,15 +345,74 @@
       "candidateId": "c-7",
       "kind": "SYNONYM",
       "forms": [
+        "탈퇴",
+        "이탈",
+        "delete_user",
+        "DELETED"
+      ],
+      "proposedPreferredForm": "탈퇴",
+      "proposedEnglishName": "UserDeletion",
+      "proposedDefinition": "사용자가 서비스를 영구적으로 해지하여 계정이 삭제되고 개인정보가 파기되는 상태 또는 행위",
+      "confidence": 0.95,
+      "reason": "기획서 및 운영 가이드의 '탈퇴', 마케팅 문서의 '이탈', 개발 API 명세의 'delete_user' 및 'DELETED'는 모두 계정을 영구적으로 삭제하여 되돌릴 수 없는 동일한 상태를 의미합니다.",
+      "occurrenceCount": 17,
+      "documentCount": 4,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "탈퇴",
+          "snippet": "풀린다.\n\n이용자가 직접 서비스를 그만두는 경우는 **탈퇴**로 처리한다. 탈퇴는 이용 보류와 달리 되돌릴 수 ",
+          "charStart": 1145,
+          "charEnd": 1147
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "이탈",
+          "snippet": "0%까지 올리는 것이 이번 분기 목표다.\n\n## 3. 이탈 방지\n\n결제 실패가 반복되는 계정은 **휴면 전환**",
+          "charStart": 333,
+          "charEnd": 335
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "delete_user",
+          "snippet": "출 |\n| `DELETE /users/{id}` | `delete_user` — 계정을 영구 삭제한다. 30일 유예 후 개인정보",
+          "charStart": 874,
+          "charEnd": 885
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "DELETED",
+          "snippet": " |\n| `SUSPENDED` | 일시 중지 |\n| `DELETED` | 탈퇴 처리됨 |\n\n`ACTIVE`가 아닌 Use",
+          "charStart": 1285,
+          "charEnd": 1292
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "탈퇴",
+          "snippet": "접 서비스를 그만두는 경우는 **탈퇴**로 처리한다. 탈퇴는 이용 보류와 달리 되돌릴 수 없으며 30일 뒤 개인",
+          "charStart": 1157,
+          "charEnd": 1159
+        }
+      ]
+    },
+    {
+      "candidateId": "c-8",
+      "kind": "SYNONYM",
+      "forms": [
         "마일리지",
         "Credit",
         "혜택금"
       ],
       "proposedPreferredForm": "마일리지",
-      "proposedEnglishName": "Credit",
-      "proposedDefinition": "프로모션 참여 등에 따라 유효기간을 두고 지급되어 다음 결제 시 현금처럼 차감 사용할 수 있는 적립형 혜택",
-      "confidence": 0.85,
-      "reason": "기획(d-001, d-004)의 '마일리지', 개발(d-002)의 'Credit', 마케팅(d-003)의 '혜택금'은 결제 시 차감 적용되는 동일한 적립형 포인트를 가리킨다.",
+      "proposedEnglishName": "Mileage",
+      "proposedDefinition": "프로모션이나 캠페인을 통해 지급되어 다음 결제 시 현금처럼 사용할 수 있고, 일정 유효기간이 지나면 소멸하는 적립금",
+      "confidence": 0.92,
+      "reason": "기획서 및 운영 가이드의 '마일리지', 개발 명세의 'Credit', 마케팅 문서의 '혜택금'은 모두 결제 시 현금처럼 사용 가능하고 유효기간이 존재하여 자동 소멸하는 동일한 혜택 수단을 가리킵니다.",
       "occurrenceCount": 10,
       "documentCount": 4,
       "occurrences": [
@@ -398,77 +459,19 @@
       ]
     },
     {
-      "candidateId": "c-8",
-      "kind": "SYNONYM",
-      "forms": [
-        "탈퇴",
-        "delete_user",
-        "이탈"
-      ],
-      "proposedPreferredForm": "탈퇴",
-      "proposedEnglishName": "Account Deletion",
-      "proposedDefinition": "이용자가 직접 서비스를 종료하거나 계정을 영구 삭제하여 복구할 수 없는 상태",
-      "confidence": 0.85,
-      "reason": "기획(d-001)의 '탈퇴', 개발(d-002)의 'delete_user', 마케팅(d-003)의 '이탈'은 모두 계정을 영구 삭제하고 복구 불가능한 동일한 행위 및 상태를 가리킨다.",
-      "occurrenceCount": 16,
-      "documentCount": 4,
-      "occurrences": [
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "탈퇴",
-          "snippet": "풀린다.\n\n이용자가 직접 서비스를 그만두는 경우는 **탈퇴**로 처리한다. 탈퇴는 이용 보류와 달리 되돌릴 수 ",
-          "charStart": 1145,
-          "charEnd": 1147
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "delete_user",
-          "snippet": "출 |\n| `DELETE /users/{id}` | `delete_user` — 계정을 영구 삭제한다. 30일 유예 후 개인정보",
-          "charStart": 874,
-          "charEnd": 885
-        },
-        {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "이탈",
-          "snippet": "0%까지 올리는 것이 이번 분기 목표다.\n\n## 3. 이탈 방지\n\n결제 실패가 반복되는 계정은 **휴면 전환**",
-          "charStart": 333,
-          "charEnd": 335
-        },
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "탈퇴",
-          "snippet": "접 서비스를 그만두는 경우는 **탈퇴**로 처리한다. 탈퇴는 이용 보류와 달리 되돌릴 수 없으며 30일 뒤 개인",
-          "charStart": 1157,
-          "charEnd": 1159
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "delete_user",
-          "snippet": "\n`suspend_account`는 되돌릴 수 있고 `delete_user`는 되돌릴 수 없다. User 레코드의 `status",
-          "charStart": 1019,
-          "charEnd": 1030
-        }
-      ]
-    },
-    {
       "candidateId": "c-9",
       "kind": "HOMOGRAPH",
       "forms": [
         "주문"
       ],
       "confidence": 0.95,
-      "reason": "기획 문서에서는 이용자가 담기 버튼을 누르는 시점에 미결제 주문이 생성되는 반면, 개발 API 명세에서는 PG 결제 승인이 완료된 시점에만 주문(order) 레코드가 생성되어, 부서별로 가리키는 대상 및 레코드 집합이 다르다.",
+      "reason": "기획팀은 결제 전 장바구니 단계부터 '주문'이 생성된다고 보는 반면, 개발팀은 결제가 완료된 후에만 '주문(order)' 레코드가 생성된다고 정의하여 두 부서 간에 가리키는 대상과 데이터의 생성 시점이 명확히 다릅니다.",
       "occurrenceCount": 14,
       "documentCount": 3,
       "senses": [
         {
-          "label": "구매 희망 및 장바구니 담기 단계의 미결제 주문",
-          "definition": "상품 상세 등에서 선택 및 담기 행위로 생성된 결제 승인 전 단계의 구매 시도 건",
+          "label": "결제 전 주문",
+          "definition": "이용자가 상품 상세 보기에서 담기 버튼을 눌러 생성된 결제 전 단계의 상태(장바구니에 담긴 상태 포함)",
           "occurrences": [
             {
               "documentId": "d-001",
@@ -489,8 +492,8 @@
           ]
         },
         {
-          "label": "결제 승인 완료 후 확정된 주문 레코드",
-          "definition": "PG 결제 승인이 완료되어 orderId가 부여되고 이행 대기열에 들어가는 최종 결제 완료 건",
+          "label": "결제 완료 주문",
+          "definition": "결제 승인(PG approve)이 완료된 시점에만 생성되는 확정된 주문 레코드(order)",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -510,14 +513,14 @@
       "forms": [
         "활성"
       ],
-      "confidence": 0.9,
-      "reason": "마케팅 문서에서는 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미하나, 개발 문서에서는 접속 여부와 무관하게 정상 이용 가능한 계정 및 구독 상태(ACTIVE)를 의미하여 가리키는 대상의 집계 결과가 다르다.",
+      "confidence": 0.95,
+      "reason": "마케팅팀은 실제 접속 이력을 기준으로 '활성' 유저를 정의하는 반면, 개발팀은 시스템상의 계정 상태나 구독 유효 여부를 '활성(ACTIVE)'으로 정의하여 대상의 기준과 집계 방식이 완전히 다릅니다.",
       "occurrenceCount": 5,
       "documentCount": 3,
       "senses": [
         {
-          "label": "최근 접속 이력 기준 마케팅 유저 세그먼트",
-          "definition": "최근 30일 이내에 1회 이상 서비스에 접속한 이용자 집단",
+          "label": "활성 유저 세그먼트",
+          "definition": "최근 30일 내에 1회 이상 서비스에 접속한 사용자",
           "occurrences": [
             {
               "documentId": "d-003",
@@ -530,8 +533,8 @@
           ]
         },
         {
-          "label": "계정 및 구독의 정상 이용 가능 상태(ACTIVE)",
-          "definition": "계정 또는 구독이 중지나 해지 없이 정상 권한을 유지하고 있는 시스템 상태값 (접속 여부와 무관)",
+          "label": "활성 계정 상태",
+          "definition": "정상적으로 서비스를 이용할 수 있는 계정 상태(User.status의 ACTIVE)",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -540,7 +543,13 @@
               "snippet": "ING` | 가입 대기 |\n| `ACTIVE` | **활성** 상태. 정상 이용 가능 |\n| `SUSPENDED",
               "charStart": 1238,
               "charEnd": 1240
-            },
+            }
+          ]
+        },
+        {
+          "label": "활성 구독 상태",
+          "definition": "콘텐츠 접근 권한이 유효한 구독 엔티티의 상태(Subscription.status의 ACTIVE)",
+          "occurrences": [
             {
               "documentId": "d-005",
               "department": "개발",
@@ -552,14 +561,104 @@
           ]
         }
       ]
+    },
+    {
+      "candidateId": "c-11",
+      "kind": "HOMOGRAPH",
+      "forms": [
+        "정산"
+      ],
+      "confidence": 0.9,
+      "reason": "개발팀은 매출 및 결제 대금의 정산을 의미하는 반면, 마케팅팀은 광고 집행에 따른 비용 정산을 의미하므로 대상이 되는 자금의 흐름과 목적이 다릅니다.",
+      "occurrenceCount": 11,
+      "documentCount": 3,
+      "senses": [
+        {
+          "label": "매출 대금 정산",
+          "definition": "PG사로부터 결제 대금을 정산받거나 가맹점 배치를 통해 매출 대금을 정산하는 과정",
+          "occurrences": [
+            {
+              "documentId": "d-002",
+              "department": "개발",
+              "form": "정산",
+              "snippet": "이며, 이 경우 주문은 생성되지 않는다.\n\n## 4. 정산\n\nPG사는 승인된 결제 대금을 **정산** 주기에 따",
+              "charStart": 536,
+              "charEnd": 538
+            },
+            {
+              "documentId": "d-005",
+              "department": "개발",
+              "form": "정산",
+              "snippet": "Changed` | 요금제 변경 확인 |\n\n## 8. 정산 연동\n\n가맹점 **정산** 배치는 구독 결제분과 단건",
+              "charStart": 1559,
+              "charEnd": 1561
+            }
+          ]
+        },
+        {
+          "label": "광고 비용 정산",
+          "definition": "광고 매체별로 집행한 광고비를 월말 기준으로 마감하여 비용을 지급하는 과정",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "정산",
+              "snippet": " 경고를 두 번 준 뒤 차단한다.\n\n## 9. 캠페인 정산\n\n광고 매체별 집행액은 매월 말 **정산**한다. 정",
+              "charStart": 1553,
+              "charEnd": 1555
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "candidateId": "c-12",
+      "kind": "HOMOGRAPH",
+      "forms": [
+        "등급"
+      ],
+      "confidence": 0.9,
+      "reason": "기획팀은 사용자의 구매 기여도에 따른 회원 등급을 의미하는 반면, 마케팅팀은 콘텐츠의 시청 제한 연령 등급을 의미하여 가리키는 대상이 완전히 다릅니다.",
+      "occurrenceCount": 6,
+      "documentCount": 2,
+      "senses": [
+        {
+          "label": "회원 등급",
+          "definition": "결제 누적 금액에 따라 일반, 실버, 골드로 나뉘는 회원 등급",
+          "occurrences": [
+            {
+              "documentId": "d-001",
+              "department": "기획",
+              "form": "등급",
+              "snippet": "며 30일 뒤 개인정보가 삭제된다.\n\n## 6. 회원 등급\n\n결제 누적 금액에 따라 회원 **등급**을 나눈다.",
+              "charStart": 1209,
+              "charEnd": 1211
+            }
+          ]
+        },
+        {
+          "label": "콘텐츠 관람 등급",
+          "definition": "전체 이용가 또는 청소년 관람불가 등 콘텐츠의 연령 제한 등급",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "등급",
+              "snippet": " 전환율이 3%를 넘으면 성공으로 본다.\n\n콘텐츠 **등급**에 따라 노출 대상을 나눈다. 전체 이용가 콘텐츠는",
+              "charStart": 1066,
+              "charEnd": 1068
+            }
+          ]
+        }
+      ]
     }
   ],
   "usage": {
-    "model": "gemini-3.6-flash",
+    "model": "gemini-3.5-flash",
     "inputTokens": 6793,
-    "outputTokens": 1196,
+    "outputTokens": 1661,
     "llmCalls": 1,
-    "elapsedMs": 47648
+    "elapsedMs": 24058
   },
   "warnings": []
 }

@@ -290,10 +290,10 @@
         "휴면 전환"
       ],
       "proposedPreferredForm": "이용 보류",
-      "proposedEnglishName": "Account Suspension",
-      "proposedDefinition": "결제 실패 누적 등의 사유로 인해 계정의 서비스 이용 권한이 일시적으로 중단된 상태",
-      "confidence": 0.9,
-      "reason": "기획(d-001, d-004)의 '이용 보류', 개발(d-002)의 'suspend_account', 마케팅(d-003)의 '휴면 전환'은 모두 결제 실패 누적 시 계정 이용 권한을 일시 정지하는 동일한 개념과 상태를 의미한다.",
+      "proposedEnglishName": "SuspendedAccount",
+      "proposedDefinition": "결제 실패가 누적되어 서비스 이용이 일시적으로 제한되었으나, 결제 수단 재등록 등을 통해 복구 가능한 계정 상태",
+      "confidence": 0.95,
+      "reason": "기획 문서의 '이용 보류', 개발 API의 'suspend_account', 마케팅 문서의 '휴면 전환' 모두 결제 실패 누적으로 인해 계정이 일시 중지되나 복구 가능한 동일한 상태를 지칭함.",
       "occurrenceCount": 13,
       "documentCount": 5,
       "occurrences": [
@@ -343,73 +343,15 @@
       "candidateId": "c-7",
       "kind": "SYNONYM",
       "forms": [
-        "마일리지",
-        "Credit",
-        "혜택금"
-      ],
-      "proposedPreferredForm": "마일리지",
-      "proposedEnglishName": "Credit",
-      "proposedDefinition": "프로모션 참여 등에 따라 유효기간을 두고 지급되어 다음 결제 시 현금처럼 차감 사용할 수 있는 적립형 혜택",
-      "confidence": 0.85,
-      "reason": "기획(d-001, d-004)의 '마일리지', 개발(d-002)의 'Credit', 마케팅(d-003)의 '혜택금'은 결제 시 차감 적용되는 동일한 적립형 포인트를 가리킨다.",
-      "occurrenceCount": 10,
-      "documentCount": 4,
-      "occurrences": [
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "마일리지",
-          "snippet": " 리워드 정책\n\n프로모션 기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸",
-          "charStart": 1327,
-          "charEnd": 1331
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "Credit",
-          "snippet": " API가 403을 반환한다.\n\n## 7. 리워드\n\n`Credit` 엔티티는 User에 귀속되며 결제 시 차감된다. 잔",
-          "charStart": 1361,
-          "charEnd": 1367
-        },
-        {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "혜택금",
-          "snippet": "준다.\n\n## 5. 혜택 설계\n\n캠페인 참여자에게 **혜택금**을 지급한다. 혜택금은 다음 결제에 쓸 수 있는 적",
-          "charStart": 895,
-          "charEnd": 898
-        },
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "마일리지",
-          "snippet": "기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸 수 있으며 유효기간은 지",
-          "charStart": 1341,
-          "charEnd": 1345
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "Credit",
-          "snippet": "T /users/{id}/credits`로 조회한다. Credit은 만료일을 가지며 만료된 것은 자동으로 소멸한다.\n\n",
-          "charStart": 1433,
-          "charEnd": 1439
-        }
-      ]
-    },
-    {
-      "candidateId": "c-8",
-      "kind": "SYNONYM",
-      "forms": [
         "탈퇴",
         "delete_user",
         "이탈"
       ],
       "proposedPreferredForm": "탈퇴",
-      "proposedEnglishName": "Account Deletion",
-      "proposedDefinition": "이용자가 직접 서비스를 종료하거나 계정을 영구 삭제하여 복구할 수 없는 상태",
-      "confidence": 0.85,
-      "reason": "기획(d-001)의 '탈퇴', 개발(d-002)의 'delete_user', 마케팅(d-003)의 '이탈'은 모두 계정을 영구 삭제하고 복구 불가능한 동일한 행위 및 상태를 가리킨다.",
+      "proposedEnglishName": "AccountDeletion",
+      "proposedDefinition": "사용자의 요청에 의해 계정을 영구적으로 삭제하고 개인정보를 파기하는 절차로, 되돌릴 수 없는 상태",
+      "confidence": 0.92,
+      "reason": "기획의 '탈퇴', 개발 API의 'delete_user', 마케팅의 '이탈' 모두 계정을 영구 삭제하고 30일 유예 후 개인정보를 파기하는 동일한 비가역적 상태를 의미함.",
       "occurrenceCount": 16,
       "documentCount": 4,
       "occurrences": [
@@ -456,19 +398,241 @@
       ]
     },
     {
+      "candidateId": "c-8",
+      "kind": "SYNONYM",
+      "forms": [
+        "요금제 변경",
+        "change_tier"
+      ],
+      "proposedPreferredForm": "요금제 변경",
+      "proposedEnglishName": "ChangeTier",
+      "proposedDefinition": "구독 중인 서비스의 요금제 등급(Tier)을 상향 또는 하향하여 변경하는 절차",
+      "confidence": 0.95,
+      "reason": "기획의 '요금제 변경'과 개발 API의 'change_tier'는 동일하게 요금제 등급을 변경하는 기능을 지칭함.",
+      "occurrenceCount": 6,
+      "documentCount": 3,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "요금제 변경",
+          "snippet": "며, 시스템이 자동으로 처리하는 것과 구분한다.\n\n**요금제 변경**은 언제든 가능하다. 상위 요금제로 바꾸면 차액을 ",
+          "charStart": 911,
+          "charEnd": 917
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "change_tier",
+          "snippet": "인정보 파기 |\n| `PATCH /users/{id}/change_tier` | 요금제를 바꾼다. 상향은 즉시, 하향은 다음 주",
+          "charStart": 942,
+          "charEnd": 953
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "요금제 변경",
+          "snippet": "래된 세션을 끊고 안내 문구를 띄운다.\n\n기기 제한은 요금제 변경 즉시 반영된다. 상위 요금제로 올리면 기기 제한이 바",
+          "charStart": 1511,
+          "charEnd": 1517
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "change_tier",
+          "snippet": "구분할 수 있어야 한다.\n\n## 4. 요금제 변경\n\n`change_tier` API가 `tierCode`를 바꾼다. 상향은 즉시",
+          "charStart": 809,
+          "charEnd": 820
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "요금제 변경",
+          "snippet": "르므로 로그에서 구분할 수 있어야 한다.\n\n## 4. 요금제 변경\n\n`change_tier` API가 `tierCode",
+          "charStart": 800,
+          "charEnd": 806
+        }
+      ]
+    },
+    {
       "candidateId": "c-9",
+      "kind": "SYNONYM",
+      "forms": [
+        "마일리지",
+        "Credit",
+        "혜택금"
+      ],
+      "proposedPreferredForm": "마일리지",
+      "proposedEnglishName": "Mileage",
+      "proposedDefinition": "프로모션이나 캠페인을 통해 사용자에게 지급되어 다음 결제 시 현금처럼 사용할 수 있는 유효기간이 존재하는 적립금",
+      "confidence": 0.93,
+      "reason": "기획의 '마일리지', 개발의 'Credit', 마케팅의 '혜택금' 모두 결제 시 현금처럼 사용 가능하고 유효기간이 지나면 소멸하는 동일한 적립 혜택을 가리킴.",
+      "occurrenceCount": 10,
+      "documentCount": 4,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "마일리지",
+          "snippet": " 리워드 정책\n\n프로모션 기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸",
+          "charStart": 1327,
+          "charEnd": 1331
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "Credit",
+          "snippet": " API가 403을 반환한다.\n\n## 7. 리워드\n\n`Credit` 엔티티는 User에 귀속되며 결제 시 차감된다. 잔",
+          "charStart": 1361,
+          "charEnd": 1367
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "혜택금",
+          "snippet": "준다.\n\n## 5. 혜택 설계\n\n캠페인 참여자에게 **혜택금**을 지급한다. 혜택금은 다음 결제에 쓸 수 있는 적",
+          "charStart": 895,
+          "charEnd": 898
+        },
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "마일리지",
+          "snippet": "기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸 수 있으며 유효기간은 지",
+          "charStart": 1341,
+          "charEnd": 1345
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "Credit",
+          "snippet": "T /users/{id}/credits`로 조회한다. Credit은 만료일을 가지며 만료된 것은 자동으로 소멸한다.\n\n",
+          "charStart": 1433,
+          "charEnd": 1439
+        }
+      ]
+    },
+    {
+      "candidateId": "c-10",
+      "kind": "SYNONYM",
+      "forms": [
+        "상세 보기",
+        "detail_load"
+      ],
+      "proposedPreferredForm": "상세 보기",
+      "proposedEnglishName": "ViewDetail",
+      "proposedDefinition": "특정 상품이나 콘텐츠의 상세 정보 화면에 진입하여 조회하는 행위 또는 관련 시스템 이벤트",
+      "confidence": 0.9,
+      "reason": "기획 및 운영 가이드의 '상세 보기'와 개발 설계 노트의 'detail_load'는 사용자가 콘텐츠 상세 화면에 진입하는 동일한 행위 및 이벤트를 지칭함.",
+      "occurrenceCount": 4,
+      "documentCount": 3,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "상세 보기",
+          "snippet": "수 있다.\n\n## 3. 구매 흐름\n\n이용자가 상품 **상세 보기**에서 담기 버튼을 누르면 **주문이 생성된다.** ",
+          "charStart": 330,
+          "charEnd": 335
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "detail_load",
+          "snippet": "TL은 30분이다.\n\n## 6. 콘텐츠 접근 로그\n\n`detail_load` 이벤트를 콘텐츠 상세 진입 시마다 적재한다. 이 로",
+          "charStart": 1157,
+          "charEnd": 1168
+        },
+        {
+          "documentId": "d-004",
+          "department": "기획",
+          "form": "상세 보기",
+          "snippet": "수 없다.\n\n### 2.5 콘텐츠가 안 보입니다\n\n**상세 보기** 화면에서 재생이 안 된다는 문의는 대부분 동시 접",
+          "charStart": 1037,
+          "charEnd": 1042
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "detail_load",
+          "snippet": "표의 원천이다.\n\n```json\n{ \"event\": \"detail_load\", \"userId\": \"...\", \"contentId",
+          "charStart": 1248,
+          "charEnd": 1259
+        }
+      ]
+    },
+    {
+      "candidateId": "c-11",
+      "kind": "SYNONYM",
+      "forms": [
+        "정기 결제",
+        "반복 과금",
+        "recurring_billing"
+      ],
+      "proposedPreferredForm": "정기 결제",
+      "proposedEnglishName": "RecurringBilling",
+      "proposedDefinition": "구독 서비스 유지를 위해 매월 지정된 결제일에 자동으로 요금을 청구하고 결제하는 방식",
+      "confidence": 0.94,
+      "reason": "기획의 '정기 결제', 마케팅의 '반복 과금', 개발의 'recurring_billing'은 모두 사용자의 개입 없이 주기적으로 자동 결제되는 동일한 과금 방식을 의미함.",
+      "occurrenceCount": 6,
+      "documentCount": 4,
+      "occurrences": [
+        {
+          "documentId": "d-001",
+          "department": "기획",
+          "form": "정기 결제",
+          "snippet": "은 별도 단계다.\n\n## 4. 구독과 결제 주기\n\n**정기 결제**는 매달 같은 **결제일**에 자동으로 이뤄진다. ",
+          "charStart": 736,
+          "charEnd": 741
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "반복 과금",
+          "snippet": "벽이므로 첫 2개월 할인으로 진입 장벽을 낮춘다. **반복 과금**이 시작되는 3개월차에 이탈이 몰리는 것으로 확인돼",
+          "charStart": 781,
+          "charEnd": 786
+        },
+        {
+          "documentId": "d-005",
+          "department": "개발",
+          "form": "recurring_billing",
+          "snippet": "동으로 수행한다. 사람이 개입하지 않으며, 실패하면 `recurring_billing` 재시도 큐에 들어간다. 구독 갱신 결과는 성공·실패",
+          "charStart": 534,
+          "charEnd": 551
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "정기 결제",
+          "snippet": "수 있다. 기본 결제 수단은 하나만 지정 가능하다.\n\n정기 결제는 매월 지정된 **결제일**에 기본 결제 수단으로 청",
+          "charStart": 1547,
+          "charEnd": 1552
+        },
+        {
+          "documentId": "d-003",
+          "department": "마케팅",
+          "form": "반복 과금",
+          "snippet": "리는 것으로 확인돼 이 시점에 별도 메시지를 넣는다. 반복 과금 직전 알림의 열람률이 전환에 직접 영향을 준다.\n\n#",
+          "charStart": 836,
+          "charEnd": 841
+        }
+      ]
+    },
+    {
+      "candidateId": "c-12",
       "kind": "HOMOGRAPH",
       "forms": [
         "주문"
       ],
       "confidence": 0.95,
-      "reason": "기획 문서에서는 이용자가 담기 버튼을 누르는 시점에 미결제 주문이 생성되는 반면, 개발 API 명세에서는 PG 결제 승인이 완료된 시점에만 주문(order) 레코드가 생성되어, 부서별로 가리키는 대상 및 레코드 집합이 다르다.",
+      "reason": "기획 및 운영 가이드에서는 장바구니에 담긴 시점부터 결제 대기 상태의 건까지 모두 '주문'으로 취급하여 사용자가 수정할 수 있다고 설명하는 반면, 개발 API 명세에서는 결제 승인이 완료되어 확정된 시점에만 'order' 레코드가 생성되므로 두 부서가 정의하는 주문의 생성 시점과 대상 범위가 다름.",
       "occurrenceCount": 14,
       "documentCount": 3,
       "senses": [
         {
-          "label": "구매 희망 및 장바구니 담기 단계의 미결제 주문",
-          "definition": "상품 상세 등에서 선택 및 담기 행위로 생성된 결제 승인 전 단계의 구매 시도 건",
+          "label": "결제 대기 주문",
+          "definition": "장바구니에 상품을 담은 시점에 생성되어 결제 대기 중인 상태를 포함하는 구매 요청 단위",
           "occurrences": [
             {
               "documentId": "d-001",
@@ -489,8 +653,8 @@
           ]
         },
         {
-          "label": "결제 승인 완료 후 확정된 주문 레코드",
-          "definition": "PG 결제 승인이 완료되어 orderId가 부여되고 이행 대기열에 들어가는 최종 결제 완료 건",
+          "label": "결제 완료 주문",
+          "definition": "결제 승인이 완료된 이후에만 생성되는 확정된 주문 레코드",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -505,33 +669,19 @@
       ]
     },
     {
-      "candidateId": "c-10",
+      "candidateId": "c-13",
       "kind": "HOMOGRAPH",
       "forms": [
         "활성"
       ],
-      "confidence": 0.9,
-      "reason": "마케팅 문서에서는 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미하나, 개발 문서에서는 접속 여부와 무관하게 정상 이용 가능한 계정 및 구독 상태(ACTIVE)를 의미하여 가리키는 대상의 집계 결과가 다르다.",
+      "confidence": 0.95,
+      "reason": "개발 문서에서는 시스템 이용 권한이 정상적으로 부여된 계정 상태(ACTIVE)를 의미하는 반면, 마케팅 문서에서는 최근 30일 이내에 서비스에 1회 이상 접속한 사용자 세그먼트를 의미하여, 대상자를 판별하고 집계하는 기준이 다름.",
       "occurrenceCount": 5,
       "documentCount": 3,
       "senses": [
         {
-          "label": "최근 접속 이력 기준 마케팅 유저 세그먼트",
-          "definition": "최근 30일 이내에 1회 이상 서비스에 접속한 이용자 집단",
-          "occurrences": [
-            {
-              "documentId": "d-003",
-              "department": "마케팅",
-              "form": "활성",
-              "snippet": "| 신규 | 가입 7일 이내 | 4,200 |\n| **활성** | 최근 30일 내 1회 이상 접속 | 18,70",
-              "charStart": 205,
-              "charEnd": 207
-            }
-          ]
-        },
-        {
-          "label": "계정 및 구독의 정상 이용 가능 상태(ACTIVE)",
-          "definition": "계정 또는 구독이 중지나 해지 없이 정상 권한을 유지하고 있는 시스템 상태값 (접속 여부와 무관)",
+          "label": "계정 활성 상태",
+          "definition": "시스템 이용 권한이 정상적으로 부여되어 정상 이용 가능한 사용자 계정 상태",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -550,16 +700,120 @@
               "charEnd": 417
             }
           ]
+        },
+        {
+          "label": "활성 사용자 세그먼트",
+          "definition": "최근 30일 이내에 서비스에 1회 이상 접속한 사용자 그룹",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "활성",
+              "snippet": "| 신규 | 가입 7일 이내 | 4,200 |\n| **활성** | 최근 30일 내 1회 이상 접속 | 18,70",
+              "charStart": 205,
+              "charEnd": 207
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "candidateId": "c-14",
+      "kind": "HOMOGRAPH",
+      "forms": [
+        "정산"
+      ],
+      "confidence": 0.95,
+      "reason": "개발 문서에서는 PG사로부터 가맹점 계좌로 결제 대금이 입금되는 매출 정산을 의미하는 반면, 마케팅 문서에서는 광고 매체사에 집행한 광고비를 월말 기준으로 마감하여 지급하는 비용 정산을 의미함.",
+      "occurrenceCount": 11,
+      "documentCount": 3,
+      "senses": [
+        {
+          "label": "매출 정산",
+          "definition": "PG사로부터 가맹점 계좌로 결제 대금이 입금되는 정산",
+          "occurrences": [
+            {
+              "documentId": "d-002",
+              "department": "개발",
+              "form": "정산",
+              "snippet": "이며, 이 경우 주문은 생성되지 않는다.\n\n## 4. 정산\n\nPG사는 승인된 결제 대금을 **정산** 주기에 따",
+              "charStart": 536,
+              "charEnd": 538
+            },
+            {
+              "documentId": "d-005",
+              "department": "개발",
+              "form": "정산",
+              "snippet": "Changed` | 요금제 변경 확인 |\n\n## 8. 정산 연동\n\n가맹점 **정산** 배치는 구독 결제분과 단건",
+              "charStart": 1559,
+              "charEnd": 1561
+            }
+          ]
+        },
+        {
+          "label": "마케팅 비용 정산",
+          "definition": "광고 매체사에 집행한 광고비를 월말 기준으로 마감하여 지급하는 정산",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "정산",
+              "snippet": " 경고를 두 번 준 뒤 차단한다.\n\n## 9. 캠페인 정산\n\n광고 매체별 집행액은 매월 말 **정산**한다. 정",
+              "charStart": 1553,
+              "charEnd": 1555
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "candidateId": "c-15",
+      "kind": "HOMOGRAPH",
+      "forms": [
+        "등급"
+      ],
+      "confidence": 0.95,
+      "reason": "기획 문서에서는 사용자의 누적 결제 금액에 따라 부여되는 회원 등급(일반/실버/골드)을 의미하는 반면, 마케팅 문서에서는 콘텐츠의 관람 허용 연령 기준을 나타내는 콘텐츠 등급(전체이용가/청소년관람불가)을 의미함.",
+      "occurrenceCount": 6,
+      "documentCount": 2,
+      "senses": [
+        {
+          "label": "회원 등급",
+          "definition": "사용자의 누적 결제 금액에 따라 부여되는 회원 등급",
+          "occurrences": [
+            {
+              "documentId": "d-001",
+              "department": "기획",
+              "form": "등급",
+              "snippet": "며 30일 뒤 개인정보가 삭제된다.\n\n## 6. 회원 등급\n\n결제 누적 금액에 따라 회원 **등급**을 나눈다.",
+              "charStart": 1209,
+              "charEnd": 1211
+            }
+          ]
+        },
+        {
+          "label": "콘텐츠 등급",
+          "definition": "콘텐츠의 관람 허용 연령 기준을 나타내는 등급",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "등급",
+              "snippet": " 전환율이 3%를 넘으면 성공으로 본다.\n\n콘텐츠 **등급**에 따라 노출 대상을 나눈다. 전체 이용가 콘텐츠는",
+              "charStart": 1066,
+              "charEnd": 1068
+            }
+          ]
         }
       ]
     }
   ],
   "usage": {
-    "model": "gemini-3.6-flash",
+    "model": "gemini-3.5-flash",
     "inputTokens": 6793,
-    "outputTokens": 1196,
+    "outputTokens": 1437,
     "llmCalls": 1,
-    "elapsedMs": 47648
+    "elapsedMs": 33924
   },
   "warnings": []
 }

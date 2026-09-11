@@ -62,6 +62,13 @@ class LlmContrastMatch(BaseModel):
 
 
 class LlmContrastResult(BaseModel):
+    # 사고 유도 스키마 — 판정 전에 사전집 termId 전부를 검토했다는 걸
+    # 스키마로 강제한다. HOMOGRAPH 단계의 consideredHomographCandidates와
+    # 같은 기법(§10 D-9), §12엔 D-30에서 처음 적용. matches보다 먼저
+    # 선언해야 한다 — 모델이 스키마 필드 순서대로 채워나가므로, 정답
+    # 필드보다 앞에 둬야 "먼저 다 훑어보고 나서 판정한다"는 순서가 강제된다.
+    # 이 필드 자체는 채점에 안 쓴다.
+    consideredTermIds: list[str] = []
     matches: list[LlmContrastMatch]
 
 
@@ -242,6 +249,7 @@ def find_llm_contrast_matches(
                 inputDocuments=_input_document_specs(request),
                 outputMatches=[m.model_dump() for m in result.matches],
                 droppedMatches=dropped,
+                consideredTermIds=result.consideredTermIds,
             )
         )
         usage = Usage(model=model, inputTokens=input_tokens, outputTokens=output_tokens, llmCalls=0, elapsedMs=0)
@@ -309,6 +317,7 @@ def find_llm_contrast_matches(
             inputDocuments=_input_document_specs(request),
             outputMatches=[m.model_dump() for m in result.matches],
             droppedMatches=dropped,
+            consideredTermIds=result.consideredTermIds,
         )
     )
 

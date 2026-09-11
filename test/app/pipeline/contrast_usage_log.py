@@ -86,6 +86,10 @@ class ContrastCallDetail:
     inputDocuments: list[dict] = field(default_factory=list)
     outputMatches: list[dict] = field(default_factory=list)
     droppedMatches: list[dict] = field(default_factory=list)  # [{termId?, documentId?, matchedText?, reason}]
+    # 사고 유도 스키마(§10 D-30)의 결과 — 모델이 판정 전에 실제로 검토했다고
+    # 보고한 termId 목록. 채점에는 안 쓰고, "검토는 했는데 못 찾았는지 /
+    # 아예 검토 목록에서 빠졌는지"를 구분해 튜닝할 때만 참고한다.
+    consideredTermIds: list[str] = field(default_factory=list)
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 

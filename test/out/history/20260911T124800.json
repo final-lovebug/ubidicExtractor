@@ -286,16 +286,16 @@
       "kind": "SYNONYM",
       "forms": [
         "이용 보류",
-        "suspend_account",
-        "휴면 전환"
+        "SUSPENDED",
+        "suspend_account"
       ],
       "proposedPreferredForm": "이용 보류",
-      "proposedEnglishName": "Account Suspension",
-      "proposedDefinition": "결제 실패 누적 등의 사유로 인해 계정의 서비스 이용 권한이 일시적으로 중단된 상태",
-      "confidence": 0.9,
-      "reason": "기획(d-001, d-004)의 '이용 보류', 개발(d-002)의 'suspend_account', 마케팅(d-003)의 '휴면 전환'은 모두 결제 실패 누적 시 계정 이용 권한을 일시 정지하는 동일한 개념과 상태를 의미한다.",
+      "proposedEnglishName": "AccountSuspension",
+      "proposedDefinition": "결제 실패 누적 등으로 인해 서비스 이용이 일시적으로 제한된 계정 상태",
+      "confidence": 0.95,
+      "reason": "기획 문서와 개발 API 명세에서 결제 실패 시 계정을 일시 중지하는 동일한 상태를 지칭함",
       "occurrenceCount": 13,
-      "documentCount": 5,
+      "documentCount": 4,
       "occurrences": [
         {
           "documentId": "d-001",
@@ -308,18 +308,18 @@
         {
           "documentId": "d-002",
           "department": "개발",
+          "form": "SUSPENDED",
+          "snippet": "E` | **활성** 상태. 정상 이용 가능 |\n| `SUSPENDED` | 일시 중지 |\n| `DELETED` | 탈퇴 처",
+          "charStart": 1261,
+          "charEnd": 1270
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
           "form": "suspend_account",
           "snippet": " 자동 가입 |\n| `PATCH /users/{id}/suspend_account` | 계정을 일시 중지한다. 결제 실패 누적 시 서버",
           "charStart": 793,
           "charEnd": 808
-        },
-        {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "휴면 전환",
-          "snippet": "# 3. 이탈 방지\n\n결제 실패가 반복되는 계정은 **휴면 전환**되기 전에 리텐션 메시지를 보낸다. 휴면 전환은 이",
-          "charStart": 358,
-          "charEnd": 363
         },
         {
           "documentId": "d-001",
@@ -330,12 +330,12 @@
           "charEnd": 1047
         },
         {
-          "documentId": "d-002",
+          "documentId": "d-005",
           "department": "개발",
-          "form": "suspend_account",
-          "snippet": " 바꾼다. 상향은 즉시, 하향은 다음 주기부터 |\n\n`suspend_account`는 되돌릴 수 있고 `delete_user`는 되돌릴",
-          "charStart": 991,
-          "charEnd": 1006
+          "form": "SUSPENDED",
+          "snippet": "`status` | Enum | `ACTIVE` / `SUSPENDED` / `CANCELLED` |\n| `nextBilli",
+          "charStart": 263,
+          "charEnd": 272
         }
       ]
     },
@@ -343,75 +343,17 @@
       "candidateId": "c-7",
       "kind": "SYNONYM",
       "forms": [
-        "마일리지",
-        "Credit",
-        "혜택금"
-      ],
-      "proposedPreferredForm": "마일리지",
-      "proposedEnglishName": "Credit",
-      "proposedDefinition": "프로모션 참여 등에 따라 유효기간을 두고 지급되어 다음 결제 시 현금처럼 차감 사용할 수 있는 적립형 혜택",
-      "confidence": 0.85,
-      "reason": "기획(d-001, d-004)의 '마일리지', 개발(d-002)의 'Credit', 마케팅(d-003)의 '혜택금'은 결제 시 차감 적용되는 동일한 적립형 포인트를 가리킨다.",
-      "occurrenceCount": 10,
-      "documentCount": 4,
-      "occurrences": [
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "마일리지",
-          "snippet": " 리워드 정책\n\n프로모션 기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸",
-          "charStart": 1327,
-          "charEnd": 1331
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "Credit",
-          "snippet": " API가 403을 반환한다.\n\n## 7. 리워드\n\n`Credit` 엔티티는 User에 귀속되며 결제 시 차감된다. 잔",
-          "charStart": 1361,
-          "charEnd": 1367
-        },
-        {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "혜택금",
-          "snippet": "준다.\n\n## 5. 혜택 설계\n\n캠페인 참여자에게 **혜택금**을 지급한다. 혜택금은 다음 결제에 쓸 수 있는 적",
-          "charStart": 895,
-          "charEnd": 898
-        },
-        {
-          "documentId": "d-001",
-          "department": "기획",
-          "form": "마일리지",
-          "snippet": "기간에 결제한 이용자에게 **마일리지**를 지급한다. 마일리지는 다음 결제에서 현금처럼 쓸 수 있으며 유효기간은 지",
-          "charStart": 1341,
-          "charEnd": 1345
-        },
-        {
-          "documentId": "d-002",
-          "department": "개발",
-          "form": "Credit",
-          "snippet": "T /users/{id}/credits`로 조회한다. Credit은 만료일을 가지며 만료된 것은 자동으로 소멸한다.\n\n",
-          "charStart": 1433,
-          "charEnd": 1439
-        }
-      ]
-    },
-    {
-      "candidateId": "c-8",
-      "kind": "SYNONYM",
-      "forms": [
         "탈퇴",
-        "delete_user",
-        "이탈"
+        "DELETED",
+        "delete_user"
       ],
       "proposedPreferredForm": "탈퇴",
-      "proposedEnglishName": "Account Deletion",
-      "proposedDefinition": "이용자가 직접 서비스를 종료하거나 계정을 영구 삭제하여 복구할 수 없는 상태",
-      "confidence": 0.85,
-      "reason": "기획(d-001)의 '탈퇴', 개발(d-002)의 'delete_user', 마케팅(d-003)의 '이탈'은 모두 계정을 영구 삭제하고 복구 불가능한 동일한 행위 및 상태를 가리킨다.",
-      "occurrenceCount": 16,
-      "documentCount": 4,
+      "proposedEnglishName": "AccountDeletion",
+      "proposedDefinition": "이용자가 직접 서비스를 그만두어 계정이 영구 삭제되는 상태",
+      "confidence": 0.95,
+      "reason": "기획 문서의 '탈퇴'와 개발 문서의 'DELETED' 상태 및 'delete_user' API가 동일한 영구 삭제 절차를 의미함",
+      "occurrenceCount": 8,
+      "documentCount": 3,
       "occurrences": [
         {
           "documentId": "d-001",
@@ -424,18 +366,18 @@
         {
           "documentId": "d-002",
           "department": "개발",
+          "form": "DELETED",
+          "snippet": " |\n| `SUSPENDED` | 일시 중지 |\n| `DELETED` | 탈퇴 처리됨 |\n\n`ACTIVE`가 아닌 Use",
+          "charStart": 1285,
+          "charEnd": 1292
+        },
+        {
+          "documentId": "d-002",
+          "department": "개발",
           "form": "delete_user",
           "snippet": "출 |\n| `DELETE /users/{id}` | `delete_user` — 계정을 영구 삭제한다. 30일 유예 후 개인정보",
           "charStart": 874,
           "charEnd": 885
-        },
-        {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "이탈",
-          "snippet": "0%까지 올리는 것이 이번 분기 목표다.\n\n## 3. 이탈 방지\n\n결제 실패가 반복되는 계정은 **휴면 전환**",
-          "charStart": 333,
-          "charEnd": 335
         },
         {
           "documentId": "d-001",
@@ -456,82 +398,68 @@
       ]
     },
     {
-      "candidateId": "c-9",
+      "candidateId": "c-8",
       "kind": "HOMOGRAPH",
       "forms": [
-        "주문"
+        "정산"
       ],
-      "confidence": 0.95,
-      "reason": "기획 문서에서는 이용자가 담기 버튼을 누르는 시점에 미결제 주문이 생성되는 반면, 개발 API 명세에서는 PG 결제 승인이 완료된 시점에만 주문(order) 레코드가 생성되어, 부서별로 가리키는 대상 및 레코드 집합이 다르다.",
-      "occurrenceCount": 14,
+      "confidence": 0.9,
+      "reason": "개발팀은 PG사로부터의 대금 입금 주기를 의미하나, 마케팅팀은 광고 매체별 집행액 마감 및 결제월 기준의 비용 처리를 의미함",
+      "occurrenceCount": 11,
       "documentCount": 3,
       "senses": [
         {
-          "label": "구매 희망 및 장바구니 담기 단계의 미결제 주문",
-          "definition": "상품 상세 등에서 선택 및 담기 행위로 생성된 결제 승인 전 단계의 구매 시도 건",
-          "occurrences": [
-            {
-              "documentId": "d-001",
-              "department": "기획",
-              "form": "주문",
-              "snippet": "가 상품 **상세 보기**에서 담기 버튼을 누르면 **주문이 생성된다.** 이 시점의 주문은 아직 결제되지 않은",
-              "charStart": 353,
-              "charEnd": 355
-            },
-            {
-              "documentId": "d-004",
-              "department": "기획",
-              "form": "주문",
-              "snippet": " |\n| 단순 안내 | 운영자가 종결 |\n\n## 4. 주문 관련 안내\n\n이용자가 \"주문이 안 보인다\"고 하면, ",
-              "charStart": 1237,
-              "charEnd": 1239
-            }
-          ]
-        },
-        {
-          "label": "결제 승인 완료 후 확정된 주문 레코드",
-          "definition": "PG 결제 승인이 완료되어 orderId가 부여되고 이행 대기열에 들어가는 최종 결제 완료 건",
+          "label": "PG 정산",
+          "definition": "PG사가 승인된 결제 대금을 가맹점 계좌로 입금하는 주기",
           "occurrences": [
             {
               "documentId": "d-002",
               "department": "개발",
-              "form": "주문",
-              "snippet": "ED\n```\n\n장바구니(CART)에 담긴 항목은 아직 주문이 아니다. **결제 승인(PG approve)이 떨어",
-              "charStart": 186,
-              "charEnd": 188
+              "form": "정산",
+              "snippet": "이며, 이 경우 주문은 생성되지 않는다.\n\n## 4. 정산\n\nPG사는 승인된 결제 대금을 **정산** 주기에 따",
+              "charStart": 536,
+              "charEnd": 538
+            },
+            {
+              "documentId": "d-005",
+              "department": "개발",
+              "form": "정산",
+              "snippet": "Changed` | 요금제 변경 확인 |\n\n## 8. 정산 연동\n\n가맹점 **정산** 배치는 구독 결제분과 단건",
+              "charStart": 1559,
+              "charEnd": 1561
+            }
+          ]
+        },
+        {
+          "label": "광고비 정산",
+          "definition": "광고 매체별 집행액을 결제월 기준으로 마감하고 세금계산서를 수취하는 절차",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "정산",
+              "snippet": " 경고를 두 번 준 뒤 차단한다.\n\n## 9. 캠페인 정산\n\n광고 매체별 집행액은 매월 말 **정산**한다. 정",
+              "charStart": 1553,
+              "charEnd": 1555
             }
           ]
         }
       ]
     },
     {
-      "candidateId": "c-10",
+      "candidateId": "c-9",
       "kind": "HOMOGRAPH",
       "forms": [
         "활성"
       ],
-      "confidence": 0.9,
-      "reason": "마케팅 문서에서는 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미하나, 개발 문서에서는 접속 여부와 무관하게 정상 이용 가능한 계정 및 구독 상태(ACTIVE)를 의미하여 가리키는 대상의 집계 결과가 다르다.",
+      "confidence": 0.85,
+      "reason": "개발팀은 구독 레코드의 상태값을 의미하나, 마케팅팀은 최근 30일 내 접속 이력이 있는 이용자 세그먼트를 의미함",
       "occurrenceCount": 5,
       "documentCount": 3,
       "senses": [
         {
-          "label": "최근 접속 이력 기준 마케팅 유저 세그먼트",
-          "definition": "최근 30일 이내에 1회 이상 서비스에 접속한 이용자 집단",
-          "occurrences": [
-            {
-              "documentId": "d-003",
-              "department": "마케팅",
-              "form": "활성",
-              "snippet": "| 신규 | 가입 7일 이내 | 4,200 |\n| **활성** | 최근 30일 내 1회 이상 접속 | 18,70",
-              "charStart": 205,
-              "charEnd": 207
-            }
-          ]
-        },
-        {
-          "label": "계정 및 구독의 정상 이용 가능 상태(ACTIVE)",
-          "definition": "계정 또는 구독이 중지나 해지 없이 정상 권한을 유지하고 있는 시스템 상태값 (접속 여부와 무관)",
+          "label": "구독 상태",
+          "definition": "Subscription 엔티티의 상태값으로, 콘텐츠 접근이 가능한 상태",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -550,16 +478,30 @@
               "charEnd": 417
             }
           ]
+        },
+        {
+          "label": "이용자 세그먼트",
+          "definition": "최근 30일 내 1회 이상 접속한 이용자 그룹",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "활성",
+              "snippet": "| 신규 | 가입 7일 이내 | 4,200 |\n| **활성** | 최근 30일 내 1회 이상 접속 | 18,70",
+              "charStart": 205,
+              "charEnd": 207
+            }
+          ]
         }
       ]
     }
   ],
   "usage": {
-    "model": "gemini-3.6-flash",
+    "model": "gemini-3.1-flash-lite",
     "inputTokens": 6793,
-    "outputTokens": 1196,
+    "outputTokens": 820,
     "llmCalls": 1,
-    "elapsedMs": 47648
+    "elapsedMs": 5075
   },
   "warnings": []
 }
