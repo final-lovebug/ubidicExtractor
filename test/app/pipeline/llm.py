@@ -23,6 +23,8 @@ from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel
 
+from app.pipeline.api_keys import is_key_specific_failure, load_api_keys
+from app.pipeline.model_chain import is_model_unavailable_failure, load_default_model_chain, parse_model_chain
 from app.pipeline.usage_log import LlmCallDetail, LlmCallLog, log_call, log_call_detail
 from app.pipeline.variant import find_frequent_terms
 from app.schema import ExtractRequest, Usage
@@ -159,8 +161,13 @@ def extract_synonyms_and_homographs(
     """
     global _call_count
 
-    model = model or os.getenv("GEMINI_MODEL", "")
-    if not model:
+    # §10 D-39·D-40 — `--model`을 명시하면(콤마로 여러 개면 폴백 체인) 그걸
+    # `.env`보다 우선한다. 명시 안 하면 `.env`의 GEMINI_MODEL_1/_2/...(또는
+    # 단수 GEMINI_MODEL)를 자동으로 체인으로 쓴다. 콤마 없이 모델 하나만
+    # 주면(지금까지 써온 `--model gemini-x-y`) 길이 1짜리 목록이라 "다음
+    # 모델로" 분기가 실행될 일이 없다 — 재현성 테스트는 완전히 그대로 동작한다.
+    model_chain = parse_model_chain(model) if model else load_default_model_chain()
+    if not model_chain:
         raise RuntimeError("GEMINI_MODEL이 설정되지 않았다 — .env를 확인하라.")
 
     cache_dir = Path(os.getenv("LLM_CACHE_DIR", ".cache"))
@@ -168,29 +175,138 @@ def extract_synonyms_and_homographs(
     max_calls = int(os.getenv("MAX_LLM_CALLS", "20"))
     temperature = float(os.getenv("GEMINI_TEMPERATURE", "0.1"))
 
-    prompt = _build_prompt(request)
-    cache_file = _cache_path(cache_dir, prompt, model)
-    prompt_hash = cache_file.stem[:8]
-    _snapshot_prompt_files(prompt_hash)
+    prompt = _build_prompt(request)  # 모델과 무관한 내용이라 한 번만 만든다
 
-    if not no_cache and cache_file.exists():
-        cached = json.loads(cache_file.read_text(encoding="utf-8"))
-        result = LlmExtractionResult.model_validate(cached["result"])
-        input_tokens = cached.get("inputTokens", 0)
-        output_tokens = cached.get("outputTokens", 0)
+    config = types.GenerateContentConfig(
+        temperature=temperature,
+        response_mime_type="application/json",
+        response_schema=LlmExtractionResult,
+    )
+
+    last_model_error: Exception | None = None
+    for model_index, m in enumerate(model_chain, start=1):
+        cache_file = _cache_path(cache_dir, prompt, m)
+        prompt_hash = cache_file.stem[:8]
+        _snapshot_prompt_files(prompt_hash)
+
+        if not no_cache and cache_file.exists():
+            cached = json.loads(cache_file.read_text(encoding="utf-8"))
+            result = LlmExtractionResult.model_validate(cached["result"])
+            input_tokens = cached.get("inputTokens", 0)
+            output_tokens = cached.get("outputTokens", 0)
+            log_call(
+                LlmCallLog(
+                    stage="synonym_homograph",
+                    model=m,
+                    inputTokens=input_tokens,
+                    outputTokens=output_tokens,
+                    elapsedMs=0,
+                    cacheHit=True,
+                    jobId=request.jobId,
+                    synonymGroupsFound=len(result.synonymGroups),
+                    homographsFound=len(result.homographs),
+                    promptHash=prompt_hash,
+                    note=note,
+                    modelIndex=model_index,
+                )
+            )
+            log_call_detail(
+                LlmCallDetail(
+                    promptHash=prompt_hash,
+                    inputDocuments=_input_document_specs(request),
+                    outputSynonymGroups=[g.model_dump() for g in result.synonymGroups],
+                    outputHomographs=[h.model_dump() for h in result.homographs],
+                )
+            )
+            usage = Usage(model=m, inputTokens=input_tokens, outputTokens=output_tokens, llmCalls=0, elapsedMs=0)
+            return result, usage
+
+        if _call_count >= max_calls:
+            raise LlmCallLimitExceeded(f"프로세스당 LLM 호출 상한({max_calls}회)을 넘었다 — 루프 사고를 의심하라.")
+
+        # §10 D-38·D-40 — 키가 여러 개면 1번부터 시도하다가, 그 키 자체의
+        # 문제(인증 실패·쿼터 소진)로 막히면 다음 키로 넘어간다. 5xx 과부하도
+        # 마찬가지로 다음 키로 넘어간다(D-40) — 키가 서로 다른 프로젝트/쿼터에
+        # 속할 수 있어 "5xx는 키를 바꿔도 소용없다"고 단정할 수 없다. 키 하나당
+        # 5xx 재시도(§6, 최대 2회)는 그대로 유지 — "같은 키로 재시도"와 "다른
+        # 키로 폴백"은 별개다.
+        api_keys = load_api_keys()
+        last_attempt_error: Exception | None = None
+        used_key_index = 1
+        try:
+            for key_index, api_key in enumerate(api_keys, start=1):
+                client = genai.Client(api_key=api_key)
+                start = time.monotonic()
+                attempt = 0
+                try:
+                    while True:
+                        try:
+                            _call_count += 1
+                            response = client.models.generate_content(model=m, contents=prompt, config=config)
+                            break
+                        except errors.ServerError:
+                            # 5xx·타임아웃만 2회까지, 지수 백오프. 4xx는 재시도하지 않는다(§6).
+                            attempt += 1
+                            if attempt > 2:
+                                raise
+                            time.sleep(2**attempt)
+                    used_key_index = key_index
+                    break
+                except errors.ClientError as e:
+                    if is_key_specific_failure(e) and key_index < len(api_keys):
+                        last_attempt_error = e
+                        continue
+                    raise
+                except errors.ServerError as e:
+                    # §10 D-40 — 이 키의 2회 재시도가 다 소진된 뒤에도 5xx면,
+                    # 남은 키가 있는 한 마저 시도한다(모델을 바로 포기하지 않음).
+                    if key_index < len(api_keys):
+                        last_attempt_error = e
+                        continue
+                    raise
+            else:
+                assert last_attempt_error is not None
+                raise last_attempt_error
+        except (errors.ServerError, errors.ClientError) as e:
+            # §10 D-39 — 여기 도달했다는 건 등록된 키를 전부 시도했다는 뜻(D-40)
+            # — 그래도 이 모델이 지금 안 되면, 체인에 다음 모델이 남아있는 한
+            # 그걸로 넘어간다.
+            if is_model_unavailable_failure(e) and model_index < len(model_chain):
+                last_model_error = e
+                continue
+            raise
+
+        elapsed_ms = int((time.monotonic() - start) * 1000)
+        result = LlmExtractionResult.model_validate_json(response.text)
+
+        usage_metadata = response.usage_metadata
+        input_tokens = getattr(usage_metadata, "prompt_token_count", 0) or 0
+        output_tokens = getattr(usage_metadata, "candidates_token_count", 0) or 0
+
+        cache_file.write_text(
+            json.dumps(
+                {"result": result.model_dump(), "inputTokens": input_tokens, "outputTokens": output_tokens},
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
         log_call(
             LlmCallLog(
                 stage="synonym_homograph",
-                model=model,
+                model=m,
                 inputTokens=input_tokens,
                 outputTokens=output_tokens,
-                elapsedMs=0,
-                cacheHit=True,
+                elapsedMs=elapsed_ms,
+                cacheHit=False,
                 jobId=request.jobId,
                 synonymGroupsFound=len(result.synonymGroups),
                 homographsFound=len(result.homographs),
                 promptHash=prompt_hash,
                 note=note,
+                keyIndex=used_key_index,
+                modelIndex=model_index,
             )
         )
         log_call_detail(
@@ -201,72 +317,9 @@ def extract_synonyms_and_homographs(
                 outputHomographs=[h.model_dump() for h in result.homographs],
             )
         )
-        usage = Usage(model=model, inputTokens=input_tokens, outputTokens=output_tokens, llmCalls=0, elapsedMs=0)
+
+        usage = Usage(model=m, inputTokens=input_tokens, outputTokens=output_tokens, llmCalls=1, elapsedMs=elapsed_ms)
         return result, usage
-
-    if _call_count >= max_calls:
-        raise LlmCallLimitExceeded(f"프로세스당 LLM 호출 상한({max_calls}회)을 넘었다 — 루프 사고를 의심하라.")
-
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    config = types.GenerateContentConfig(
-        temperature=temperature,
-        response_mime_type="application/json",
-        response_schema=LlmExtractionResult,
-    )
-
-    start = time.monotonic()
-    attempt = 0
-    while True:
-        try:
-            _call_count += 1
-            response = client.models.generate_content(model=model, contents=prompt, config=config)
-            break
-        except errors.ServerError:
-            # 5xx·타임아웃만 2회까지, 지수 백오프. 4xx는 재시도하지 않는다(§6).
-            attempt += 1
-            if attempt > 2:
-                raise
-            time.sleep(2**attempt)
-
-    elapsed_ms = int((time.monotonic() - start) * 1000)
-    result = LlmExtractionResult.model_validate_json(response.text)
-
-    usage_metadata = response.usage_metadata
-    input_tokens = getattr(usage_metadata, "prompt_token_count", 0) or 0
-    output_tokens = getattr(usage_metadata, "candidates_token_count", 0) or 0
-
-    cache_file.write_text(
-        json.dumps(
-            {"result": result.model_dump(), "inputTokens": input_tokens, "outputTokens": output_tokens},
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    log_call(
-        LlmCallLog(
-            stage="synonym_homograph",
-            model=model,
-            inputTokens=input_tokens,
-            outputTokens=output_tokens,
-            elapsedMs=elapsed_ms,
-            cacheHit=False,
-            jobId=request.jobId,
-            synonymGroupsFound=len(result.synonymGroups),
-            homographsFound=len(result.homographs),
-            promptHash=prompt_hash,
-            note=note,
-        )
-    )
-    log_call_detail(
-        LlmCallDetail(
-            promptHash=prompt_hash,
-            inputDocuments=_input_document_specs(request),
-            outputSynonymGroups=[g.model_dump() for g in result.synonymGroups],
-            outputHomographs=[h.model_dump() for h in result.homographs],
-        )
-    )
-
-    usage = Usage(model=model, inputTokens=input_tokens, outputTokens=output_tokens, llmCalls=1, elapsedMs=elapsed_ms)
-    return result, usage
+    else:
+        assert last_model_error is not None
+        raise last_model_error

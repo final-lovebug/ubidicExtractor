@@ -287,14 +287,14 @@
       "forms": [
         "이용 보류",
         "SUSPENDED",
-        "일시 중지"
+        "suspend_account"
       ],
       "proposedPreferredForm": "이용 보류",
       "proposedEnglishName": "AccountSuspension",
       "proposedDefinition": "결제 실패 등의 사유로 서비스 이용이 일시적으로 제한된 계정 상태",
-      "confidence": 0.9,
-      "reason": "기획 문서와 개발 API 명세에서 동일한 상태(결제 실패 누적 시의 조치)를 지칭함",
-      "occurrenceCount": 12,
+      "confidence": 0.95,
+      "reason": "기획 문서의 '이용 보류'와 개발 문서의 'SUSPENDED' 상태 및 'suspend_account' API가 모두 동일한 계정 상태를 지칭함",
+      "occurrenceCount": 13,
       "documentCount": 4,
       "occurrences": [
         {
@@ -316,10 +316,10 @@
         {
           "documentId": "d-002",
           "department": "개발",
-          "form": "일시 중지",
-          "snippet": "s/{id}/suspend_account` | 계정을 일시 중지한다. 결제 실패 누적 시 서버가 자동 호출 |\n| `",
-          "charStart": 816,
-          "charEnd": 821
+          "form": "suspend_account",
+          "snippet": " 자동 가입 |\n| `PATCH /users/{id}/suspend_account` | 계정을 일시 중지한다. 결제 실패 누적 시 서버",
+          "charStart": 793,
+          "charEnd": 808
         },
         {
           "documentId": "d-001",
@@ -345,15 +345,15 @@
       "forms": [
         "탈퇴",
         "DELETED",
-        "이탈"
+        "delete_user"
       ],
       "proposedPreferredForm": "탈퇴",
       "proposedEnglishName": "AccountDeletion",
-      "proposedDefinition": "계정을 영구적으로 삭제하여 되돌릴 수 없는 상태",
-      "confidence": 0.85,
-      "reason": "기획 문서의 '탈퇴'와 개발 문서의 'DELETED' 상태, 마케팅 문서의 '이탈'이 모두 계정의 영구 삭제를 의미함",
-      "occurrenceCount": 15,
-      "documentCount": 4,
+      "proposedDefinition": "이용자가 서비스를 영구적으로 그만두는 행위 및 그 상태",
+      "confidence": 0.95,
+      "reason": "기획 문서의 '탈퇴'와 개발 문서의 'DELETED' 상태 및 'delete_user' API가 동일한 영구 삭제 개념을 가리킴",
+      "occurrenceCount": 8,
+      "documentCount": 3,
       "occurrences": [
         {
           "documentId": "d-001",
@@ -372,12 +372,12 @@
           "charEnd": 1292
         },
         {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "이탈",
-          "snippet": "0%까지 올리는 것이 이번 분기 목표다.\n\n## 3. 이탈 방지\n\n결제 실패가 반복되는 계정은 **휴면 전환**",
-          "charStart": 333,
-          "charEnd": 335
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "delete_user",
+          "snippet": "출 |\n| `DELETE /users/{id}` | `delete_user` — 계정을 영구 삭제한다. 30일 유예 후 개인정보",
+          "charStart": 874,
+          "charEnd": 885
         },
         {
           "documentId": "d-001",
@@ -388,12 +388,12 @@
           "charEnd": 1159
         },
         {
-          "documentId": "d-003",
-          "department": "마케팅",
-          "form": "이탈",
-          "snippet": "의 타겟 유저는 다시 데려올 여지가 있다.\n\n반면 **이탈**은 계정을 아주 지우는 것이라 되돌릴 수 없다. 이",
-          "charStart": 457,
-          "charEnd": 459
+          "documentId": "d-002",
+          "department": "개발",
+          "form": "delete_user",
+          "snippet": "\n`suspend_account`는 되돌릴 수 있고 `delete_user`는 되돌릴 수 없다. User 레코드의 `status",
+          "charStart": 1019,
+          "charEnd": 1030
         }
       ]
     },
@@ -404,13 +404,27 @@
         "정산"
       ],
       "confidence": 0.9,
-      "reason": "개발팀은 PG사로부터의 입금 주기를 의미하나, 마케팅팀은 광고 매체별 집행액 마감 및 세금계산서 수취 과정을 의미함",
+      "reason": "마케팅팀은 광고 매체 집행액의 마감을 의미하는 반면, 개발팀은 PG사로부터의 결제 대금 입금 주기를 의미함",
       "occurrenceCount": 11,
       "documentCount": 3,
       "senses": [
         {
-          "label": "PG 정산",
-          "definition": "PG사가 승인된 결제 대금을 가맹점 계좌로 입금하는 주기",
+          "label": "광고 정산",
+          "definition": "광고 매체별 집행액을 매월 말 마감하는 절차",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "정산",
+              "snippet": " 경고를 두 번 준 뒤 차단한다.\n\n## 9. 캠페인 정산\n\n광고 매체별 집행액은 매월 말 **정산**한다. 정",
+              "charStart": 1553,
+              "charEnd": 1555
+            }
+          ]
+        },
+        {
+          "label": "결제 정산",
+          "definition": "PG사가 승인된 결제 대금을 가맹점 계좌로 입금하는 주기적 절차",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -429,20 +443,6 @@
               "charEnd": 1561
             }
           ]
-        },
-        {
-          "label": "광고비 정산",
-          "definition": "광고 매체별 집행액을 마감하고 세금계산서를 처리하는 행정 절차",
-          "occurrences": [
-            {
-              "documentId": "d-003",
-              "department": "마케팅",
-              "form": "정산",
-              "snippet": " 경고를 두 번 준 뒤 차단한다.\n\n## 9. 캠페인 정산\n\n광고 매체별 집행액은 매월 말 **정산**한다. 정",
-              "charStart": 1553,
-              "charEnd": 1555
-            }
-          ]
         }
       ]
     },
@@ -453,13 +453,27 @@
         "활성"
       ],
       "confidence": 0.85,
-      "reason": "개발팀은 계정의 정상 이용 가능 여부(상태값)를 의미하나, 마케팅팀은 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미함",
+      "reason": "마케팅팀은 접속 이력을 기준으로 한 사용자 세그먼트를 의미하나, 개발팀은 구독 엔티티의 상태값(ACTIVE)을 의미함",
       "occurrenceCount": 5,
       "documentCount": 3,
       "senses": [
         {
-          "label": "계정 상태",
-          "definition": "User 레코드의 status 필드값이 ACTIVE인 상태",
+          "label": "사용자 세그먼트",
+          "definition": "최근 30일 내 1회 이상 접속한 사용자 그룹",
+          "occurrences": [
+            {
+              "documentId": "d-003",
+              "department": "마케팅",
+              "form": "활성",
+              "snippet": "| 신규 | 가입 7일 이내 | 4,200 |\n| **활성** | 최근 30일 내 1회 이상 접속 | 18,70",
+              "charStart": 205,
+              "charEnd": 207
+            }
+          ]
+        },
+        {
+          "label": "구독 상태값",
+          "definition": "구독 레코드의 상태가 정상 이용 가능한 상태(ACTIVE)임을 나타내는 값",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -478,20 +492,6 @@
               "charEnd": 417
             }
           ]
-        },
-        {
-          "label": "사용자 세그먼트",
-          "definition": "최근 30일 내 1회 이상 접속한 사용자 집단",
-          "occurrences": [
-            {
-              "documentId": "d-003",
-              "department": "마케팅",
-              "form": "활성",
-              "snippet": "| 신규 | 가입 7일 이내 | 4,200 |\n| **활성** | 최근 30일 내 1회 이상 접속 | 18,70",
-              "charStart": 205,
-              "charEnd": 207
-            }
-          ]
         }
       ]
     }
@@ -499,9 +499,9 @@
   "usage": {
     "model": "gemini-3.1-flash-lite",
     "inputTokens": 6793,
-    "outputTokens": 810,
+    "outputTokens": 814,
     "llmCalls": 1,
-    "elapsedMs": 4133
+    "elapsedMs": 5385
   },
   "warnings": []
 }

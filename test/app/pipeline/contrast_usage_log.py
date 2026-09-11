@@ -48,6 +48,8 @@ class ContrastCallLog:
     matchesDropped: int = 0
     promptHash: str = ""
     note: str = ""
+    keyIndex: int = 1  # §10 D-38 — 몇 번째 API 키로 성공했는지(키 값 자체는 절대 안 남긴다)
+    modelIndex: int = 1  # §10 D-39 — `--model`에 콤마로 나열한 체인에서 몇 번째 모델로 성공했는지
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
@@ -146,7 +148,9 @@ def format_timeline(entries: list[ContrastCallLog]) -> str:
         found = f"returned={e.matchesReturned} accepted={e.matchesAccepted} dropped={e.matchesDropped}"
         tokens = f"in={e.inputTokens} out={e.outputTokens}"
         prompt = f"prompt={e.promptHash}" if e.promptHash else ""
-        line = f"  {i}. {ts}  [{kind}]  {found}  {tokens}  {e.elapsedMs}ms  {prompt}"
+        key_note = f"key#{e.keyIndex}" if e.keyIndex != 1 else ""
+        model_note = f"model#{e.modelIndex}({e.model})" if e.modelIndex != 1 else ""
+        line = f"  {i}. {ts}  [{kind}]  {found}  {tokens}  {e.elapsedMs}ms  {prompt}  {key_note}  {model_note}".rstrip()
         if e.note:
             line += f"\n       note: {e.note}"
         lines.append(line)

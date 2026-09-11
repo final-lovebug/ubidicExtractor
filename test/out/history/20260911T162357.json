@@ -293,7 +293,7 @@
       "proposedEnglishName": "AccountSuspension",
       "proposedDefinition": "결제 실패 등의 사유로 서비스 이용이 일시적으로 제한된 계정 상태",
       "confidence": 0.9,
-      "reason": "기획 문서와 개발 API 명세에서 동일한 상태(결제 실패 누적 시의 조치)를 지칭함",
+      "reason": "기획 문서와 개발 API 명세에서 동일한 계정 상태를 지칭하는 용어들임",
       "occurrenceCount": 12,
       "documentCount": 4,
       "occurrences": [
@@ -349,9 +349,9 @@
       ],
       "proposedPreferredForm": "탈퇴",
       "proposedEnglishName": "AccountDeletion",
-      "proposedDefinition": "계정을 영구적으로 삭제하여 되돌릴 수 없는 상태",
+      "proposedDefinition": "계정 정보가 영구적으로 삭제되는 상태",
       "confidence": 0.85,
-      "reason": "기획 문서의 '탈퇴'와 개발 문서의 'DELETED' 상태, 마케팅 문서의 '이탈'이 모두 계정의 영구 삭제를 의미함",
+      "reason": "기획팀의 '탈퇴'와 개발팀의 'DELETED' 상태, 마케팅팀의 '이탈'이 모두 계정의 영구적 삭제를 의미함",
       "occurrenceCount": 15,
       "documentCount": 4,
       "occurrences": [
@@ -432,7 +432,7 @@
         },
         {
           "label": "광고비 정산",
-          "definition": "광고 매체별 집행액을 마감하고 세금계산서를 처리하는 행정 절차",
+          "definition": "광고 매체별 집행액을 매월 말 마감하고 세금계산서를 수취하는 과정",
           "occurrences": [
             {
               "documentId": "d-003",
@@ -453,13 +453,13 @@
         "활성"
       ],
       "confidence": 0.85,
-      "reason": "개발팀은 계정의 정상 이용 가능 여부(상태값)를 의미하나, 마케팅팀은 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미함",
+      "reason": "개발팀은 계정의 상태값(ACTIVE)을 의미하나, 마케팅팀은 최근 30일 내 접속 이력이 있는 사용자 세그먼트를 의미함",
       "occurrenceCount": 5,
       "documentCount": 3,
       "senses": [
         {
           "label": "계정 상태",
-          "definition": "User 레코드의 status 필드값이 ACTIVE인 상태",
+          "definition": "User 엔티티의 status 필드값이 ACTIVE인 상태",
           "occurrences": [
             {
               "documentId": "d-002",
@@ -499,9 +499,9 @@
   "usage": {
     "model": "gemini-3.1-flash-lite",
     "inputTokens": 6793,
-    "outputTokens": 810,
+    "outputTokens": 789,
     "llmCalls": 1,
-    "elapsedMs": 4133
+    "elapsedMs": 3570
   },
   "warnings": []
 }

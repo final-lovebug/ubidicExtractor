@@ -36,6 +36,7 @@ from app.pipeline.contrast import (
 )
 from app.pipeline.contrast_llm import find_llm_contrast_matches
 from app.pipeline.llm import extract_synonyms_and_homographs
+from app.pipeline.model_chain import load_default_model_chain
 from app.pipeline.normalize import load_fixture_request, make_snippet
 from app.pipeline.synonym import build_homograph_candidates, build_synonym_candidates
 from app.pipeline.variant import find_variants
@@ -90,7 +91,9 @@ def _today_real_calls_combined(model: str, utc_today: date) -> tuple[int, int]:
 def extract(
     fixtures: Path = typer.Option(Path("fixtures"), "--fixtures", help="fixtures 폴더 경로"),
     out: Path = typer.Option(Path("out/result.json"), "--out", help="결과 JSON 저장 경로"),
-    model: str = typer.Option("", "--model", help="GEMINI_MODEL을 이번 실행만 덮어쓴다"),
+    model: str = typer.Option(
+        "", "--model", help="GEMINI_MODEL을 이번 실행만 덮어쓴다. 콤마로 여러 개 나열하면 모델 폴백 체인(§10 D-39)"
+    ),
     no_cache: bool = typer.Option(False, "--no-cache", help="LLM 응답 캐시를 무시하고 다시 호출한다"),
     skip_llm: bool = typer.Option(
         False, "--skip-llm", help="VARIANT만 돌리고 Gemini를 부르지 않는다 (오프셋 디버깅용, API 호출 안 함)"
@@ -106,10 +109,23 @@ def extract(
     **매번 `out/history/`에도 자동으로 스냅샷을 남긴다** — 코드를 고치기 전후
     결과를 나중에 비교할 수 있어야 하기 때문이다. 의미 있는 시점("4단계
     통과")에 이름을 붙이고 싶으면 `archive --label`을 별도로 돌린다.
+
+    `--model`에 콤마로 여러 모델을 나열하면 등록된 키(§10 D-38)를 전부 써도
+    안 될 때 다음 모델로 자동 폴백한다(§10 D-39). 모델 하나만 주면 지금까지와
+    똑같이 폴백 없이 그 모델만 쓴다.
     """
     request = load_fixture_request(fixtures)
     candidates: list[GroupCandidate | HomographCandidate] = list(find_variants(request))
-    usage = Usage(model=model or os.getenv("GEMINI_MODEL", "mock"), inputTokens=0, outputTokens=0, llmCalls=0, elapsedMs=0)
+    # --skip-llm 표시용 placeholder일 뿐 실제로 이 모델을 호출하지는 않는다 —
+    # 폴백 체인의 첫 번째 값만 참고로 보여준다(§10 D-40).
+    default_chain = load_default_model_chain()
+    usage = Usage(
+        model=model or (default_chain[0] if default_chain else "mock"),
+        inputTokens=0,
+        outputTokens=0,
+        llmCalls=0,
+        elapsedMs=0,
+    )
     warnings: list[str] = []
 
     if skip_llm:
@@ -228,7 +244,9 @@ def contrast(
         Path("fixtures/contrast"), "--fixtures", help="§12 전용 fixtures 폴더 (extract용 fixtures/와 분리)"
     ),
     out: Path = typer.Option(Path("out/contrast_result.json"), "--out", help="결과 JSON 저장 경로"),
-    model: str = typer.Option("", "--model", help="GEMINI_MODEL을 이번 실행만 덮어쓴다"),
+    model: str = typer.Option(
+        "", "--model", help="GEMINI_MODEL을 이번 실행만 덮어쓴다. 콤마로 여러 개 나열하면 모델 폴백 체인(§10 D-39)"
+    ),
     no_cache: bool = typer.Option(False, "--no-cache", help="LLM 응답 캐시를 무시하고 다시 호출한다"),
     note: str = typer.Option("", "--note", help="튜닝 루프 메모 — usage-report 타임라인에 그대로 남는다"),
 ) -> None:
@@ -242,6 +260,10 @@ def contrast(
     `extract`가 `out/history/`에 남기는 것과 같은 이유이지만 폴더는
     완전히 분리했다(§10 D-20). 라벨을 붙이고 싶으면 `archive-contrast
     --label`을 따로 돌린다.
+
+    `--model`에 콤마로 여러 모델을 나열하면 등록된 키(§10 D-38)를 전부 써도
+    안 될 때 다음 모델로 자동 폴백한다(§10 D-39). 모델 하나만 주면 지금까지와
+    똑같이 폴백 없이 그 모델만 쓴다.
     """
     request = load_contrast_fixture_request(fixtures)
     suggestions, usage = find_llm_contrast_matches(request, model=model or None, no_cache=no_cache, note=note)
@@ -339,7 +361,13 @@ def usage_report(
         for stage, count in summary.byStage.items():
             typer.echo(f"  {stage}: {count}")
 
-    model = os.getenv("GEMINI_MODEL", "")
+    # §10 D-40 — `.env`에 폴백 체인(GEMINI_MODEL_1/_2/...)이 등록됐을 수 있다.
+    # 여러 모델 전체의 한도를 한 번에 보여주는 건 범위 밖(D-39)이라, 1번째
+    # (우선순위가 가장 높은) 모델 기준으로만 보여준다 — 나머지는 --model로
+    # 직접 지정해서 이 명령을 다시 돌리거나 콘솔에서 확인.
+    default_chain = load_default_model_chain()
+    model = default_chain[0] if default_chain else ""
+    chain_note = f"(폴백 체인 {len(default_chain)}개 중 1번째)" if len(default_chain) > 1 else ""
     limits = usage_log.limits_for_model(model) if model else None
     if limits:
         # 모델별로 RPD가 따로 관리된다(Google 쪽 쿼터가 모델 단위다) — 오늘 전체
@@ -352,7 +380,7 @@ def usage_report(
         # 모델이면 같은 RPD를 나눠 쓰므로 반드시 합산해서 보여준다(§10 D-20).
         extract_calls, contrast_calls = _today_real_calls_combined(model, utc_today)
         combined = extract_calls + contrast_calls
-        typer.echo(f"\n무료 티어 한도({model}): RPD {limits['rpd']}회 · RPM {limits['rpm']}회 · TPM {limits['tpm']:,}")
+        typer.echo(f"\n무료 티어 한도({model}){chain_note}: RPD {limits['rpd']}회 · RPM {limits['rpm']}회 · TPM {limits['tpm']:,}")
         typer.echo(
             f"오늘(UTC 기준) 이 모델 실제 API 호출: {combined} / {limits['rpd']}"
             f"  (용어추출 {extract_calls} + 사전집 대조 {contrast_calls}, 같은 모델은 RPD를 공유한다."
@@ -392,12 +420,15 @@ def contrast_usage_report(
     typer.echo(f"입력 토큰 합계 {summary.totalInputTokens:,}  ·  출력 토큰 합계 {summary.totalOutputTokens:,}")
     typer.echo(f"매치 채택 합계 {summary.totalMatchesAccepted}  ·  매치 환각(버려짐) 합계 {summary.totalMatchesDropped}")
 
-    model = os.getenv("GEMINI_MODEL", "")
+    # §10 D-40 — usage-report와 같은 이유로 폴백 체인의 1번째 모델 기준만 보여준다.
+    default_chain = load_default_model_chain()
+    model = default_chain[0] if default_chain else ""
+    chain_note = f"(폴백 체인 {len(default_chain)}개 중 1번째)" if len(default_chain) > 1 else ""
     limits = usage_log.limits_for_model(model) if model else None
     if limits:
         extract_calls, contrast_calls = _today_real_calls_combined(model, utc_today)
         combined = extract_calls + contrast_calls
-        typer.echo(f"\n무료 티어 한도({model}): RPD {limits['rpd']}회 · RPM {limits['rpm']}회 · TPM {limits['tpm']:,}")
+        typer.echo(f"\n무료 티어 한도({model}){chain_note}: RPD {limits['rpd']}회 · RPM {limits['rpm']}회 · TPM {limits['tpm']:,}")
         typer.echo(
             f"오늘(UTC 기준) 이 모델 실제 API 호출: {combined} / {limits['rpd']}"
             f"  (사전집 대조 {contrast_calls} + 용어추출 {extract_calls}, 같은 모델은 RPD를 공유한다)"

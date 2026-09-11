@@ -70,6 +70,8 @@ class LlmCallLog:
     homographsFound: int = 0
     promptHash: str = ""  # 프롬프트 sha256 앞 8자리 — .cache/{hash}.json과 대응
     note: str = ""  # "이번에 뭘 바꿔서 다시 불렀는지" 한 줄 메모 (--note로 입력)
+    keyIndex: int = 1  # §10 D-38 — 몇 번째 API 키로 성공했는지(키 값 자체는 절대 안 남긴다)
+    modelIndex: int = 1  # §10 D-39 — `--model`에 콤마로 나열한 체인에서 몇 번째 모델로 성공했는지
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
@@ -174,7 +176,9 @@ def format_timeline(entries: list[LlmCallLog]) -> str:
         found = f"synonym={e.synonymGroupsFound} homograph={e.homographsFound}"
         tokens = f"in={e.inputTokens} out={e.outputTokens}"
         prompt = f"prompt={e.promptHash}" if e.promptHash else ""
-        line = f"  {i}. {ts}  [{kind}]  {found}  {tokens}  {e.elapsedMs}ms  {prompt}"
+        key_note = f"key#{e.keyIndex}" if e.keyIndex != 1 else ""
+        model_note = f"model#{e.modelIndex}({e.model})" if e.modelIndex != 1 else ""
+        line = f"  {i}. {ts}  [{kind}]  {found}  {tokens}  {e.elapsedMs}ms  {prompt}  {key_note}  {model_note}".rstrip()
         if e.note:
             line += f"\n       note: {e.note}"
         lines.append(line)
