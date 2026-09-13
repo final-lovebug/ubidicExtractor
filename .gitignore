@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# 프로젝트 고유 — ubidict-py 작업 추적 문서(개인 작업 메모, 커밋 안 함)
+ubidict-py/task.md

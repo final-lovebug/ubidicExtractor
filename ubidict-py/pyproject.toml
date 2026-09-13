@@ -1,0 +1,21 @@
+[project]
+name = "ubidict-py"
+version = "0.1.0"
+description = "유비쿼터스 언어 사전 — 용어 추출(extract)·사전집 대조(contrast) 프로덕션 서비스. test/에서 검증된 로직을 SQS+MySQL 연동 FastAPI 서비스로 포팅한 것 (task.md 참고)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "google-genai",
+    "python-dotenv",
+    "boto3",
+    "pymysql",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]

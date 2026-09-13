@@ -1,0 +1,13 @@
+# CodeDeploy — ECS 블루/그린 배포 명세(템플릿).
+# <TASK_DEFINITION>은 CodeDeploy가 배포 시점에 등록된 새 태스크 정의 ARN으로
+# 치환한다(taskdef.json을 ECS에 register-task-definition 한 결과).
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: "ubidict-py"
+          ContainerPort: 8000
+        PlatformVersion: "LATEST"

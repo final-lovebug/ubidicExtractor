@@ -1,0 +1,40 @@
+# 로컬 전용 개발/테스트 인프라 — 실제 AWS/백엔드 없이 전체 흐름(SQS→처리→SQS)을
+# 로컬에서 검증하기 위한 것. 프로덕션 배포와는 무관하다(그건 deploy/ 참고).
+#
+# 사용법:
+#   docker compose -f docker-compose.local.yml up -d
+#   python scripts/init_local_queues.py          # 큐 2개 생성, .env에 넣을 URL 출력
+#   python scripts/stub_backend.py --type extract  # 가짜 백엔드로 요청 보내고 응답 확인
+#
+# LocalStack = SQS를 흉내내는 로컬 서버. MySQL = 멱등성 테이블용 로컬 DB.
+services:
+  localstack:
+    image: localstack/localstack:3.8
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - AWS_DEFAULT_REGION=ap-northeast-2
+    volumes:
+      - localstack_data:/var/lib/localstack
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      # 호스트 3308 → 컨테이너 3306. 이 머신엔 3306·3307 둘 다 이미 다른
+      # mysqld가 떠 있어서(실제로 확인됨) 3308로 뗐다 — .env의 MYSQL_PORT도
+      # 반드시 3308로 맞출 것.
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=localdev
+      - MYSQL_DATABASE=ubidict
+      - MYSQL_USER=ubidict
+      - MYSQL_PASSWORD=localdev
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # MySQL 공식 이미지는 최초 기동 시 이 폴더의 .sql을 자동 실행한다.
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+
+volumes:
+  localstack_data:
+  mysql_data:
