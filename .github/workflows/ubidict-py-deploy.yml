@@ -1,0 +1,94 @@
+name: ubidict-py Deploy
+
+# main에 ubidict-py/ 변경이 들어가면: 이미지 빌드 → ECR 푸시 → ECS 태스크
+# 정의 등록 → CodeDeploy 블루/그린 배포. `ubidict-py-ci.yml`(lint+test)이
+# 이 워크플로보다 먼저 통과해야 한다는 보장은 없다 — 필요하면 나중에
+# `workflow_run`으로 체이닝한다(지금은 최소 구성).
+#
+# **이 워크플로는 아직 실제로 성공할 수 없다** — 참조하는 AWS 리소스(ECS
+# 클러스터/서비스, CodeDeploy 애플리케이션/배포 그룹, ECR 리포지토리, IAM
+# 역할, Secrets Manager 시크릿)가 하나도 프로비저닝돼 있지 않다(task.md
+# "실제 ECS/IAM/RDS 프로비저닝은 범위 밖" 참고 — Terraform/CDK는 별도
+# 작업이다). 아래 env/secrets 자리가 전부 실제 값으로 채워지고 인프라가
+# 만들어진 뒤에야 동작한다. 코드만 미리 준비해두는 것.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ubidict-py/**"
+      - ".github/workflows/ubidict-py-deploy.yml"
+  workflow_dispatch: {}  # 인프라 준비되면 수동으로 먼저 시험 실행할 수 있게
+
+permissions:
+  id-token: write   # AWS OIDC (아래 role-to-assume) — 장기 액세스 키를 시크릿에 안 둔다
+  contents: read
+
+defaults:
+  run:
+    working-directory: ubidict-py
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-northeast-2' }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY || 'ubidict-py' }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 리포 Settings → Secrets and variables → Actions 에서 만들어야 하는 것들.
+      # AWS_DEPLOY_ROLE_ARN: GitHub OIDC를 신뢰하는 IAM 역할(ECR 푸시·ECS
+      # 태스크 정의 등록·CodeDeploy 배포 생성 권한 필요) — 이 역할 자체는
+      # 인프라 작업으로 미리 만들어져 있어야 한다.
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr-login
+
+      - name: Build, tag, push image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" .
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+      # deploy/taskdef.json의 ${TASK_EXECUTION_ROLE_ARN} 등은 CodeDeploy의
+      # <IMAGE1_NAME>·<TASK_DEFINITION>과 달리 우리가 직접 채워야 한다(아래
+      # 시크릿들 — 전부 인프라 준비 후 리포 시크릿으로 등록해야 함).
+      - name: Render task definition (fill ARN placeholders)
+        env:
+          TASK_EXECUTION_ROLE_ARN: ${{ secrets.TASK_EXECUTION_ROLE_ARN }}
+          TASK_ROLE_ARN: ${{ secrets.TASK_ROLE_ARN }}
+          SECRETS_MANAGER_ARN: ${{ secrets.SECRETS_MANAGER_ARN }}
+        run: |
+          envsubst < deploy/taskdef.json > deploy/taskdef.rendered.json
+          cat deploy/taskdef.rendered.json
+
+      - name: Fill in the new image ID
+        id: render-image
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ubidict-py/deploy/taskdef.rendered.json
+          container-name: ubidict-py
+          image: ${{ steps.build-image.outputs.image }}
+
+      # ECS_CLUSTER·ECS_SERVICE·CODEDEPLOY_APPLICATION·CODEDEPLOY_DEPLOYMENT_GROUP
+      # 는 리포 Variables로 등록(비밀 아님, 이름뿐이라 secrets 말고 vars 사용 권장).
+      - name: Deploy to Amazon ECS (CodeDeploy blue/green)
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-image.outputs.task-definition }}
+          service: ${{ vars.ECS_SERVICE }}
+          cluster: ${{ vars.ECS_CLUSTER }}
+          codedeploy-appspec: ubidict-py/deploy/appspec.yaml
+          codedeploy-application: ${{ vars.CODEDEPLOY_APPLICATION }}
+          codedeploy-deployment-group: ${{ vars.CODEDEPLOY_DEPLOYMENT_GROUP }}

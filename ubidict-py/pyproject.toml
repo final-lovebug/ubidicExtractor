@@ -13,9 +13,29 @@ dependencies = [
     "pymysql",
 ]
 
+[project.optional-dependencies]
+# CI 전용(.github/workflows/ubidict-py-ci.yml) — 배포 이미지엔 안 들어간다(Dockerfile 참고).
+dev = [
+    "pytest",
+    "httpx",   # FastAPI TestClient가 씀
+    "ruff",
+]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.ruff]
+line-length = 120  # 한글 주석이 많아 기본 88은 너무 자주 걸린다
+
+[tool.ruff.lint]
+# 실제 버그를 잡는 규칙만 — pyflakes(F)·pycodestyle 에러(E4/E7/E9). `test/`에서
+# 그대로 포팅한 코드의 스타일(정렬·pyupgrade 제안 등)까지 강제로 뜯어고치지
+# 않는다 — 이미 검증된 로직이라 불필요한 diff로 리스크를 만들지 않기 위함.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
