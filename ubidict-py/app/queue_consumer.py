@@ -28,9 +28,9 @@ import os
 import boto3
 
 from app.idempotency import already_processed, mark_processed
+from app.job_schema import ContrastJobRequest, ExtractJobRequest
 from app.queue_schema import QueueResultEnvelope, QueueTaskEnvelope
-from app.schema import ContrastRequest, ExtractRequest
-from app.service import run_contrast, run_extract
+from app.service import run_contrast_job, run_extract_job
 
 logger = logging.getLogger("queue_consumer")
 
@@ -107,21 +107,25 @@ def _handle_message(client, queue_url: str, message: dict) -> None:
         logger.exception(f"jobId={envelope.jobId} 멱등성 확인 실패 — 메시지를 삭제하지 않는다")
         return
 
+    job: ExtractJobRequest | ContrastJobRequest | None = None
     try:
         if envelope.type == "extract":
-            request = ExtractRequest.model_validate(envelope.payload)
-            response = run_extract(request, note="sqs")
+            job = ExtractJobRequest.model_validate(envelope.payload)
+            response = run_extract_job(job)
         else:
-            request = ContrastRequest.model_validate(envelope.payload)
-            response = run_contrast(request, note="sqs")
+            job = ContrastJobRequest.model_validate(envelope.payload)
+            response = run_contrast_job(job)
         result_envelope = QueueResultEnvelope(
             jobId=envelope.jobId, type=envelope.type, status="SUCCESS",
+            accessToken=job.accessToken if job else None,
             result=response.model_dump(), error=None,
         )
     except Exception as e:
         logger.exception(f"jobId={envelope.jobId} 처리 실패")
         result_envelope = QueueResultEnvelope(
-            jobId=envelope.jobId, type=envelope.type, status="FAILED", result=None, error=str(e),
+            jobId=envelope.jobId, type=envelope.type, status="FAILED",
+            accessToken=job.accessToken if job else None,
+            result=None, error=str(e),
         )
         # 실패 알림은 보내되(백엔드가 참고할 수 있게), 멱등성 기록은 안 하고
         # 메시지도 삭제하지 않는다 — SQS가 재시도하다 반복 실패하면 DLQ로 간다.

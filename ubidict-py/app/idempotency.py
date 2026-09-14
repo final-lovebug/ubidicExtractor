@@ -29,6 +29,7 @@ def _connect() -> pymysql.connections.Connection:
         user=os.getenv("MYSQL_USER"),
         password=os.getenv("MYSQL_PASSWORD"),
         database=os.getenv("MYSQL_DATABASE"),
+        charset="utf8mb4",
         autocommit=True,
         connect_timeout=5,
     )
