@@ -1,0 +1,20 @@
+# CodeDeploy — EC2/On-Premises(단일 인스턴스, IN_PLACE) 배포 명세.
+# `final/deploy/appspec.yml`(Spring 백엔드, 같은 계정·같은 CodeDeploy 앱
+# `lovebug` 아래에서 실제로 운영 중)과 동일한 구조를 그대로 따른다 — ECS용
+# `Resources: - TargetService: ...` 스키마가 아니다(이전 appspec.yaml은
+# ECS 전용이라 EC2 배포에 쓸 수 없어 전면 교체했다).
+version: 0.0
+os: linux
+hooks:
+  ApplicationStop:
+    - location: scripts/stop_container.sh
+      timeout: 60
+      runas: root
+  AfterInstall:
+    - location: scripts/start_container.sh
+      timeout: 300
+      runas: root
+  ValidateService:
+    - location: scripts/validate.sh
+      timeout: 180
+      runas: root
