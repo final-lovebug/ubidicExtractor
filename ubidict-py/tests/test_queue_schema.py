@@ -6,7 +6,28 @@
 
 from __future__ import annotations
 
-from app.queue_schema import QueueResultEnvelope, QueueTaskEnvelope
+from app.queue_schema import LlmJobRequest, QueueResultEnvelope, QueueTaskEnvelope
+
+
+def test_spring_llm_request_parses_mock_mode():
+    request = LlmJobRequest.model_validate(
+        {
+            "contractVersion": 1,
+            "requestId": "0d5c6f6e-0000-4000-8000-000000000001",
+            "jobType": "TERM_EXTRACTION",
+            "jobId": 30,
+            "workspaceId": 1,
+            "dictionaryId": None,
+            "sourceDocumentIds": [10],
+            "documentId": None,
+            "documentVersionNo": None,
+            "mode": "MOCK",
+            "requestedAt": "2026-09-14T10:00:00+09:00",
+        }
+    )
+
+    assert request.mode == "MOCK"
+    assert request.jobType == "TERM_EXTRACTION"
 
 
 def test_task_envelope_parses_minimal_extract_message():

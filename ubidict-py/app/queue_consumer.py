@@ -1,13 +1,8 @@
-"""SQS 요청 큐를 롱폴링으로 소비해 처리하고, 결과를 응답 큐로 발행한다.
+"""SQS 요청 큐를 롱폴링으로 소비하고 Spring에 HTTP 콜백한다.
 
-`queue_schema.py`의 봉투가 **초안**이라는 걸 감안하고 읽을 것 — 백엔드
-실제 계약이 오면 이 파일의 파싱·발행 부분을 다시 맞춰야 한다.
-
-흐름: 메시지 수신 → 멱등성 확인(`app.idempotency`) → 처리(`app.service`)
-→ 응답 큐 발행 → 멱등성 기록 → 메시지 삭제. 실패(파싱 실패·처리 실패)는
-메시지를 삭제하지 않는다 — SQS의 재시도(가시성 타임아웃 만료 후 재배달)와
-DLQ(반복 실패 시 격리)에 맡긴다. DLQ 자체의 설정(최대 수신 횟수 등)은
-인프라 범위라 여기서 하지 않는다.
+Spring 계약은 응답 큐를 쓰지 않는다. 워커는 요청 메시지의 ``requestId``를
+그대로 본문에 넣어 ``/api/internal/llm/**``으로 콜백하고, 2xx·4xx면 메시지를
+삭제하며 5xx·네트워크 오류만 SQS 재시도에 맡긴다.
 
 `SQS_REQUEST_QUEUE_URL`이 `.env`에 없으면 컨슈머를 아예 시작하지 않는다
 — 로컬에서 HTTP 엔드포인트(`/extract`·`/contrast`)만으로 개발·테스트할 때
@@ -22,15 +17,15 @@ AWS 자격증명이 없어도 앱이 뜨게 하기 위해서다.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 import boto3
 
-from app.idempotency import already_processed, mark_processed
-from app.job_schema import ContrastJobRequest, ExtractJobRequest
-from app.queue_schema import QueueResultEnvelope, QueueTaskEnvelope
-from app.service import run_contrast_job, run_extract_job
+from app.queue_schema import LlmJobRequest
 
 logger = logging.getLogger("queue_consumer")
 
@@ -91,66 +86,78 @@ def _handle_message(client, queue_url: str, message: dict) -> None:
     receipt_handle = message["ReceiptHandle"]
 
     try:
-        envelope = QueueTaskEnvelope.model_validate_json(message["Body"])
+        job = LlmJobRequest.model_validate_json(message["Body"])
     except Exception:
         logger.exception("메시지 파싱 실패 — 형식이 잘못됐다. 삭제하지 않고 DLQ 정책에 맡긴다.")
         return
 
     try:
-        if already_processed(envelope.jobId):
-            logger.info(f"jobId={envelope.jobId} 이미 처리됨(중복 배달) — 건너뛰고 메시지만 삭제")
-            client.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)
-            return
+        callback_path, body = _callback_for(job)
+        status = _post_callback(callback_path, body)
     except Exception:
-        # 멱등성 확인 자체가 실패하면(예: MySQL 연결 불가) 안전한 쪽으로 —
-        # 메시지를 삭제하지 않고 그대로 둔다(중복 처리 위험보다 유실 위험이 더 크다).
-        logger.exception(f"jobId={envelope.jobId} 멱등성 확인 실패 — 메시지를 삭제하지 않는다")
+        logger.exception("jobId=%s 콜백 전송 실패 — 메시지를 삭제하지 않는다", job.jobId)
         return
 
-    job: ExtractJobRequest | ContrastJobRequest | None = None
-    try:
-        if envelope.type == "extract":
-            job = ExtractJobRequest.model_validate(envelope.payload)
-            response = run_extract_job(job)
-        else:
-            job = ContrastJobRequest.model_validate(envelope.payload)
-            response = run_contrast_job(job)
-        result_envelope = QueueResultEnvelope(
-            jobId=envelope.jobId, type=envelope.type, status="SUCCESS",
-            accessToken=job.accessToken if job else None,
-            result=response.model_dump(), error=None,
+    if status < 500:
+        client.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)
+        logger.info("jobId=%s callback completed. status=%s", job.jobId, status)
+    else:
+        logger.warning("jobId=%s callback returned %s — SQS 재시도를 위해 메시지를 남긴다", job.jobId, status)
+
+
+def _callback_for(job: LlmJobRequest) -> tuple[str, dict]:
+    """요청 모드와 작업 종류에 맞는 Spring 콜백 경로·본문을 만든다."""
+    if job.mode == "REAL":
+        return _failure_callback(job, "REAL 모드는 아직 이 워커에 구현되지 않았습니다.", "REAL_MODE_NOT_IMPLEMENTED")
+
+    if job.jobType == "TERM_EXTRACTION":
+        if not job.sourceDocumentIds:
+            return _failure_callback(job, "용어 추출 요청에 sourceDocumentIds가 없습니다.", "INVALID_REQUEST")
+        terms = [] if job.mode == "STUB" else [_mock_term(job.sourceDocumentIds[0])]
+        return (
+            f"/api/internal/llm/extractions/{job.jobId}/result",
+            {"requestId": job.requestId, "sourceDocumentIds": job.sourceDocumentIds, "terms": terms},
         )
-    except Exception as e:
-        logger.exception(f"jobId={envelope.jobId} 처리 실패")
-        result_envelope = QueueResultEnvelope(
-            jobId=envelope.jobId, type=envelope.type, status="FAILED",
-            accessToken=job.accessToken if job else None,
-            result=None, error=str(e),
-        )
-        # 실패 알림은 보내되(백엔드가 참고할 수 있게), 멱등성 기록은 안 하고
-        # 메시지도 삭제하지 않는다 — SQS가 재시도하다 반복 실패하면 DLQ로 간다.
-        # (주의: 재시도마다 FAILED 응답이 매번 발행될 수 있다 — 백엔드가 jobId
-        # 기준으로 "가장 최근 상태"만 신뢰하도록 처리해야 한다. reference/backend
-        # 참고 — 이 부분은 백엔드 팀과 확정 필요.)
-        _publish_reply(client, envelope, result_envelope)
-        return
 
-    _publish_reply(client, envelope, result_envelope)
+    suggestions: list[dict] = []
+    return (
+        f"/api/internal/llm/checks/{job.jobId}/result",
+        {"requestId": job.requestId, "documentVersionNo": job.documentVersionNo, "suggestions": suggestions},
+    )
+
+
+def _mock_term(document_id: int) -> dict:
+    """개발 환경에서만 쓰는, Spring 검증 규격을 충족하는 고정 추출 결과다."""
+    return {
+        "form": "결제",
+        "proposedDefinition": "재화나 용역의 대가를 지급하는 행위",
+        "proposedEnglishName": "Payment",
+        "occurredDocumentIds": [document_id],
+        "occurrenceCount": 1,
+        "contextSnippets": ["mock 용어 추출 결과입니다."],
+        "variantForms": ["결제", "페이먼트"],
+    }
+
+
+def _failure_callback(job: LlmJobRequest, reason: str, code: str) -> tuple[str, dict]:
+    resource = "extractions" if job.jobType == "TERM_EXTRACTION" else "checks"
+    return (
+        f"/api/internal/llm/{resource}/{job.jobId}/failure",
+        {"requestId": job.requestId, "reason": reason, "code": code},
+    )
+
+
+def _post_callback(path: str, body: dict) -> int:
+    """동기 HTTP 콜백의 상태 코드를 돌려준다. HTTP 오류도 재시도 정책 판단에 쓴다."""
+    base_url = os.getenv("BACKEND_CALLBACK_BASE_URL", "http://localhost:8080").rstrip("/")
+    request = Request(
+        f"{base_url}{path}",
+        data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
     try:
-        mark_processed(envelope.jobId, envelope.type)
-    except Exception:
-        # 응답은 이미 나갔는데 기록만 실패한 경우 — 메시지를 지워버리면 이
-        # jobId가 재배달됐을 때 멱등성 체크에 걸리지 않아 다시 처리(=응답 중복
-        # 발행)될 수 있다. 그래도 메시지는 지운다 — 무한 재처리보다는 낫다는
-        # 판단(§10 D-38·D-40에서 반복해온 "완벽한 보장보다 알려진 트레이드오프"
-        # 원칙과 같다).
-        logger.exception(f"jobId={envelope.jobId} mark_processed 실패(응답은 이미 발행됨)")
-    client.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)
-
-
-def _publish_reply(client, envelope: QueueTaskEnvelope, result_envelope: QueueResultEnvelope) -> None:
-    reply_queue_url = envelope.replyQueueUrl or os.getenv("SQS_REPLY_QUEUE_URL")
-    if not reply_queue_url:
-        logger.error(f"jobId={envelope.jobId} — 응답 큐 URL이 없어 결과를 보낼 수 없다(메시지·환경변수 둘 다 확인)")
-        return
-    client.send_message(QueueUrl=reply_queue_url, MessageBody=result_envelope.model_dump_json())
+        with urlopen(request, timeout=10) as response:
+            return response.status
+    except HTTPError as error:
+        return error.code
